@@ -6,6 +6,8 @@
 <h2>Nov zapis simptoma</h2>
 
 <form method="post">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+
     <label for="simptom_id">1. Simptom</label>
     <select id="simptom_id" name="simptom_id" required>
         {% for simptom in simptomi %}

@@ -91,3 +91,37 @@ povezave na CDN.
 cdn.jsdelivr.net) — zavrnjeno iz obeh zgornjih razlogov.
 
 **Za katero poglavje:** 4.3 (tehnološka zasnova), 4.5 (varstvo podatkov).
+
+## 2026-08-18 — Varnostni pregled: CSRF zaščita, odjava kot POST, opuščen zaklep prijave
+
+**Vprašanje:** Ali aplikacija potrebuje CSRF zaščito, ali je odjava prek GET
+povezave ustrezna, in ali naj se doda zaščita pred grobo silo (brute-force)
+pri prijavi?
+
+**Odločitev:** Dodana je ročna CSRF zaščita (žeton, shranjen v seji, preverjen
+pri vsaki POST zahtevi prek `secrets.compare_digest`) — brez nove knjižnice.
+`/odjava` je spremenjena iz GET v POST pot. Eksplicitno sta nastavljena
+`SESSION_COOKIE_HTTPONLY` in `SESSION_COOKIE_SAMESITE=Lax`. Zaklep prijave po
+več neuspešnih poskusih (brute-force zaščita) ni bil dodan.
+
+**Utemeljitev:**
+- Brez CSRF zaščite bi tuja spletna stran lahko prek skritega obrazca v imenu
+  prijavljenega uporabnika sprožila akcijo (npr. izbris zapisa) — nesprejemljivo
+  tveganje pri aplikaciji, ki obravnava zdravstvene podatke (člen 9 GDPR).
+  Ročna implementacija (žeton + primerjava v konstantnem času) je zadostna za
+  enouporabniški prototip in ne zahteva dodatne odvisnosti (Flask-WTF), kar je
+  skladno z načelom "novih odvisnosti ne dodajaj brez dogovora".
+- Odjava (sprememba stanja) prek GET zahteve je splošno znana slaba praksa —
+  GET zahteve lahko sprožijo tudi povezave, predpomnjenje brskalnika ali
+  vnaprejšnje nalaganje, ne le namerna uporabnikova akcija.
+- Zaklep prijave po neuspelih poskusih je bil namenoma izpuščen: aplikacija je
+  lokalen enouporabniški prototip brez javne izpostavljenosti, dodatna logika
+  (števec, časovna omejitev, hramba stanja) pa poveča kompleksnost brez jasne
+  koristi za trenuten obseg. To je omejitev, ki jo je vredno omeniti v
+  poglavju 5, ne prikrita pomanjkljivost.
+
+**Zavrnjene možnosti:** Flask-WTF za CSRF (zavrnjeno — nova odvisnost za
+funkcionalnost, ki jo je mogoče doseči v ducatu vrstic). Zaklep prijave po
+neuspelih poskusih (zavrnjeno za zdaj, glej utemeljitev).
+
+**Za katero poglavje:** 4.5 (varstvo podatkov), 5 (razprava, omejitve).

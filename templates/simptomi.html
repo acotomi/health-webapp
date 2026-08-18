@@ -17,7 +17,8 @@
             <td>
                 <form method="post" action="{{ url_for('izbrisi_simptom', simptom_id=simptom.id) }}"
                       onsubmit="return confirm('Izbrišeš ta simptom?')">
-                    <button type="submit">Izbriši</button>
+                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                    <button type="submit" class="gumb-nevarno">Izbriši</button>
                 </form>
             </td>
         </tr>
@@ -30,6 +31,8 @@
 
 <h2>Dodaj simptom</h2>
 <form method="post">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+
     <label for="naziv">Naziv</label>
     <input type="text" id="naziv" name="naziv" required placeholder="npr. glavobol">
 

@@ -1,9 +1,10 @@
 import os
+import secrets
 import sqlite3
 from datetime import date, datetime, timedelta
 from functools import wraps
 
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import db
@@ -11,8 +12,32 @@ import db
 app = Flask(__name__)
 app.config["DATABASE"] = os.path.join(app.instance_path, "zdravje.db")
 app.config["SECRET_KEY"] = "razvojni-skrivni-kljuc-samo-za-lokalni-prototip"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 os.makedirs(app.instance_path, exist_ok=True)
 db.init_app(app)
+
+
+def pridobi_csrf_zeton():
+    """Vrne CSRF žeton trenutne seje; ob prvem klicu ga ustvari."""
+    if "csrf_zeton" not in session:
+        session["csrf_zeton"] = secrets.token_hex(32)
+    return session["csrf_zeton"]
+
+
+app.jinja_env.globals["csrf_zeton"] = pridobi_csrf_zeton
+
+
+@app.before_request
+def preveri_csrf_zeton():
+    """Vsaka POST zahteva mora prinesti isti žeton, ki je bil izdan tej seji.
+    Prepreči, da bi tuja stran v imenu prijavljenega uporabnika sprožila
+    akcijo (npr. izbris zapisa) prek skritega obrazca (CSRF)."""
+    if request.method == "POST":
+        poslani_zeton = request.form.get("csrf_zeton", "")
+        pravi_zeton = session.get("csrf_zeton", "")
+        if not poslani_zeton or not secrets.compare_digest(poslani_zeton, pravi_zeton):
+            abort(400)
 
 
 @app.before_request
@@ -110,7 +135,7 @@ def prijava():
     return render_template("prijava.html")
 
 
-@app.route("/odjava")
+@app.route("/odjava", methods=("POST",))
 def odjava():
     session.clear()
     return redirect(url_for("prijava"))
@@ -534,6 +559,16 @@ def povzetek():
         zacetek=zacetek,
         konec=konec,
     )
+
+
+@app.errorhandler(404)
+def stran_ne_obstaja(napaka):
+    return render_template("napaka.html", sporocilo="Te strani ni mogoče najti."), 404
+
+
+@app.errorhandler(400)
+def neveljavna_zahteva(napaka):
+    return render_template("napaka.html", sporocilo="Zahteva ni veljavna. Poskusi znova."), 400
 
 
 if __name__ == "__main__":

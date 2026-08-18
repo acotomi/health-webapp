@@ -6,14 +6,16 @@
 <h2>Registracija</h2>
 
 <form method="post">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+
     <label for="uporabnisko_ime">Uporabniško ime</label>
-    <input type="text" id="uporabnisko_ime" name="uporabnisko_ime" required>
+    <input type="text" id="uporabnisko_ime" name="uporabnisko_ime" autocomplete="username" required>
 
     <label for="geslo">Geslo</label>
-    <input type="password" id="geslo" name="geslo" required>
+    <input type="password" id="geslo" name="geslo" autocomplete="new-password" required>
 
     <label for="potrdi_geslo">Potrdi geslo</label>
-    <input type="password" id="potrdi_geslo" name="potrdi_geslo" required>
+    <input type="password" id="potrdi_geslo" name="potrdi_geslo" autocomplete="new-password" required>
 
     <button type="submit">Ustvari račun</button>
 </form>

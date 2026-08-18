@@ -28,12 +28,16 @@
             <td>
                 {% if terapija.aktivna %}
                 <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
+                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
                     <button type="submit">Vzeto</button>
                 </form>
                 {% endif %}
                 <a href="{{ url_for('uredi_terapijo', terapija_id=terapija.id) }}">Uredi</a>
                 <form method="post" action="{{ url_for('preklopi_terapijo', terapija_id=terapija.id) }}">
-                    <button type="submit">{{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}</button>
+                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                    <button type="submit" class="{{ 'gumb-nevarno' if terapija.aktivna else '' }}">
+                        {{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}
+                    </button>
                 </form>
             </td>
         </tr>
@@ -46,6 +50,8 @@
 
 <h2>Dodaj terapijo</h2>
 <form method="post">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+
     <label for="naziv">Naziv</label>
     <input type="text" id="naziv" name="naziv" required placeholder="npr. Ibuprofen">
 

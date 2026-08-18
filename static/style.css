@@ -50,6 +50,22 @@ header nav a {
     color: var(--barva-poudarek);
 }
 
+header nav form {
+    display: inline;
+    margin: 0;
+}
+
+header nav form button {
+    margin: 0 0 0 1rem;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--barva-poudarek);
+    font-size: 1rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .container {
     max-width: 640px;
     margin: 0 auto;
@@ -102,10 +118,26 @@ button:hover, input[type="submit"]:hover {
     background-color: var(--barva-poudarek-temna);
 }
 
+.gumb-nevarno {
+    background-color: var(--barva-napaka-besedilo);
+}
+
+.gumb-nevarno:hover {
+    background-color: #7f1d1d;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
+}
+
+@media (max-width: 600px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }
 
 th, td {

@@ -31,6 +31,7 @@
             <td>{{ terapija.vzeto_danes }}</td>
             <td>
                 <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
+                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
                     <button type="submit">Vzeto</button>
                 </form>
             </td>

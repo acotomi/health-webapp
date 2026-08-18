@@ -6,6 +6,8 @@
 <h2>Uredi terapijo</h2>
 
 <form method="post">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+
     <label for="naziv">Naziv</label>
     <input type="text" id="naziv" name="naziv" required value="{{ terapija.naziv }}">
 
