@@ -31,7 +31,7 @@ zdravstvenem stanju, priporočila odmerkov, napovedovanje poslabšanj).
 - Python 3, Flask
 - SQLite (datotečna baza)
 - Jinja2 predloge, običajen HTML/CSS
-- Chart.js za grafični prikaz
+- Chart.js za grafični prikaz - shranjen lokalno v static/, brez CDN
 - Brez zunanjih storitev, brez prijave prek tretjih ponudnikov
 
 Novih odvisnosti ne dodajaj brez izrecnega dogovora. Vsaka knjižnica je nekaj,
@@ -78,6 +78,8 @@ Zdravstveni podatki so posebna vrsta osebnih podatkov (člen 9 GDPR).
 - Sporočila commitov v slovenščini, kratka in opisna.
 - Po vsaki zaključeni funkcionalnosti zabeleži odločitve — glej veščino
   `zabelezi-odlocitev`. Te zapiske avtor potrebuje za poglavja 4.3–4.5 in 5.
+- Za obliko (CSS, predloge) upoštevaj veščino `oblikovanje` — preden ustvariš
+  novo HTML predlogo, da se stila ne izumlja znova pri vsakem zaslonu.
 
 ## Datoteke
 

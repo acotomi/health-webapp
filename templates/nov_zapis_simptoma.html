@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block naslov %}Nov zapis simptoma{% endblock %}
+
+{% block vsebina %}
+<h2>Nov zapis simptoma</h2>
+
+<form method="post">
+    <label for="simptom_id">1. Simptom</label>
+    <select id="simptom_id" name="simptom_id" required>
+        {% for simptom in simptomi %}
+        <option value="{{ simptom.id }}">{{ simptom.naziv }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="jakost">2. Jakost (0 = brez, 10 = najhujša): <output id="jakost-vrednost">5</output></label>
+    <input type="range" id="jakost" name="jakost" min="0" max="10" value="5"
+           oninput="document.getElementById('jakost-vrednost').textContent = this.value">
+
+    <label for="opomba">3. Opomba (neobvezno)</label>
+    <textarea id="opomba" name="opomba" rows="3"></textarea>
+
+    <button type="submit">Shrani</button>
+</form>
+{% endblock %}

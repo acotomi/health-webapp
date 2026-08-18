@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block naslov %}Nadzorna plošča{% endblock %}
+
+{% block vsebina %}
+<h2>Pozdravljen, {{ g.uporabnik.uporabnisko_ime }}</h2>
+<p>Tu bo nadzorna plošča: graf zadnjih 30 dni in današnje terapije.</p>
+
+<p><a class="gumb" href="{{ url_for('nov_zapis_simptoma') }}">Nov zapis simptoma</a></p>
+{% endblock %}

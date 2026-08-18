@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block naslov %}Registracija{% endblock %}
+
+{% block vsebina %}
+<h2>Registracija</h2>
+
+<form method="post">
+    <label for="uporabnisko_ime">Uporabniško ime</label>
+    <input type="text" id="uporabnisko_ime" name="uporabnisko_ime" required>
+
+    <label for="geslo">Geslo</label>
+    <input type="password" id="geslo" name="geslo" required>
+
+    <label for="potrdi_geslo">Potrdi geslo</label>
+    <input type="password" id="potrdi_geslo" name="potrdi_geslo" required>
+
+    <button type="submit">Ustvari račun</button>
+</form>
+
+<p><a href="{{ url_for('prijava') }}">Že imaš račun? Prijavi se.</a></p>
+{% endblock %}

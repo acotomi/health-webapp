@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block naslov %}Simptomi{% endblock %}
+
+{% block vsebina %}
+<h2>Vrste simptomov</h2>
+
+{% if simptomi %}
+<table>
+    <thead>
+        <tr><th>Naziv</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for simptom in simptomi %}
+        <tr>
+            <td>{{ simptom.naziv }}</td>
+            <td>
+                <form method="post" action="{{ url_for('izbrisi_simptom', simptom_id=simptom.id) }}"
+                      onsubmit="return confirm('Izbrišeš ta simptom?')">
+                    <button type="submit">Izbriši</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Še nimaš dodanega nobenega simptoma.</p>
+{% endif %}
+
+<h2>Dodaj simptom</h2>
+<form method="post">
+    <label for="naziv">Naziv</label>
+    <input type="text" id="naziv" name="naziv" required placeholder="npr. glavobol">
+
+    <button type="submit">Dodaj</button>
+</form>
+{% endblock %}

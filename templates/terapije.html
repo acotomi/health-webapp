@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block naslov %}Terapije{% endblock %}
+
+{% block vsebina %}
+<h2>Terapije</h2>
+
+{% if terapije %}
+<table>
+    <thead>
+        <tr>
+            <th>Naziv</th>
+            <th>Odmerek</th>
+            <th>Pogostost</th>
+            <th>Stanje</th>
+            <th>Danes vzeto</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for terapija in terapije %}
+        <tr>
+            <td>{{ terapija.naziv }}</td>
+            <td>{{ terapija.odmerek or "–" }}</td>
+            <td>{{ terapija.pogostost or "–" }}</td>
+            <td>{{ "aktivna" if terapija.aktivna else "ukinjena" }}</td>
+            <td>{{ terapija.vzeto_danes }}</td>
+            <td>
+                {% if terapija.aktivna %}
+                <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
+                    <button type="submit">Vzeto</button>
+                </form>
+                {% endif %}
+                <a href="{{ url_for('uredi_terapijo', terapija_id=terapija.id) }}">Uredi</a>
+                <form method="post" action="{{ url_for('preklopi_terapijo', terapija_id=terapija.id) }}">
+                    <button type="submit">{{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Še nimaš dodane nobene terapije.</p>
+{% endif %}
+
+<h2>Dodaj terapijo</h2>
+<form method="post">
+    <label for="naziv">Naziv</label>
+    <input type="text" id="naziv" name="naziv" required placeholder="npr. Ibuprofen">
+
+    <label for="odmerek">Odmerek (neobvezno)</label>
+    <input type="text" id="odmerek" name="odmerek" placeholder="npr. 400 mg">
+
+    <label for="pogostost">Pogostost (neobvezno)</label>
+    <input type="text" id="pogostost" name="pogostost" placeholder="npr. 2-krat dnevno">
+
+    <button type="submit">Dodaj</button>
+</form>
+{% endblock %}

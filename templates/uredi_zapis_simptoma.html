@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block naslov %}Uredi zapis{% endblock %}
+
+{% block vsebina %}
+<h2>Uredi zapis simptoma</h2>
+
+<form method="post">
+    <label for="simptom_id">Simptom</label>
+    <select id="simptom_id" name="simptom_id" required>
+        {% for simptom in simptomi %}
+        <option value="{{ simptom.id }}" {% if simptom.id == zapis.simptom_id %}selected{% endif %}>{{ simptom.naziv }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="datum">Datum</label>
+    <input type="date" id="datum" name="datum" required value="{{ zapis.datum }}">
+
+    <label for="jakost">Jakost (0–10): <output id="jakost-vrednost">{{ zapis.jakost }}</output></label>
+    <input type="range" id="jakost" name="jakost" min="0" max="10" value="{{ zapis.jakost }}"
+           oninput="document.getElementById('jakost-vrednost').textContent = this.value">
+
+    <label for="opomba">Opomba (neobvezno)</label>
+    <textarea id="opomba" name="opomba" rows="3">{{ zapis.opomba or '' }}</textarea>
+
+    <button type="submit">Shrani</button>
+</form>
+
+<p><a href="{{ url_for('zgodovina') }}">Nazaj na zgodovino</a></p>
+{% endblock %}

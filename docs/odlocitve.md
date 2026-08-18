@@ -37,3 +37,33 @@ zajeti.
 
 **Za katero poglavje:** 4.3 (tehnološka zasnova), 5 (razprava — omejitve
 privzetega vedenja SQLite pri tujih ključih).
+
+## 2026-08-18 — Samodejni datum pri novem zapisu simptoma in pravilo brisanja simptoma
+
+**Vprašanje:** Ali naj obrazec "Nov zapis simptoma" vključuje polje za datum? Kaj
+se zgodi, če uporabnik poskuša izbrisati vrsto simptoma, ki že ima shranjene
+zapise jakosti?
+
+**Odločitev:** Obrazec za nov zapis nima polja za datum — datum se samodejno
+nastavi na današnji dan (`date.today()`). Vrste simptoma z obstoječimi zapisi
+ni mogoče izbrisati; aplikacija to prepreči s preverjanjem v kodi (uporabniku
+pojasni zakaj), ne šele s tem, da baza vrže napako.
+
+**Utemeljitev:**
+- Zaslon "Nov zapis simptoma" v specifikaciji (poglavje 4) navaja natanko tri
+  elemente: izbira simptoma, drsnik jakosti, opomba — brez datuma. To se sklada
+  z N3 (vnos v največ treh korakih) in ugotovitvijo 3.2.2 o obremenjujočem
+  vnosu: dodatno polje bi korak podaljšalo. Vnos za pretekle dni bo mogoč
+  kasneje prek urejanja v Zgodovini (F8), ne prek hitrega dnevnega vnosa.
+- Ker so tuji ključi v SQLite vklopljeni (glej prejšnji vnos), bi poskus
+  izbrisa simptoma z obstoječimi zapisi tako ali tako povzročil napako baze.
+  Preverjanje v kodi pred izbrisom uporabniku pove razlog v razumljivem jeziku,
+  namesto da bi videl surovo napako — skladno z N2 (razumljiv vmesnik).
+
+**Zavrnjene možnosti:** Kaskadno brisanje (izbris simptoma bi samodejno
+izbrisal tudi vse njegove zapise) je bilo zavrnjeno — pri zdravstvenih podatkih
+tiho izgubljanje zgodovine ni sprejemljivo (F8: uporabnik ima nadzor nad
+lastnimi podatki, izbris mora biti nameren in eksploziten, ne stranski učinek).
+
+**Za katero poglavje:** 4.3 (tehnološka zasnova), 4.4 (vmesnik — utemeljitev
+treh korakov).

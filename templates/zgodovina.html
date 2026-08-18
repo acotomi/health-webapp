@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block naslov %}Zgodovina{% endblock %}
+
+{% block vsebina %}
+<h2>Zgodovina zapisov</h2>
+
+<form method="get">
+    <label for="od">Od</label>
+    <input type="date" id="od" name="od" value="{{ zacetek }}">
+
+    <label for="do">Do</label>
+    <input type="date" id="do" name="do" value="{{ konec }}">
+
+    <button type="submit">Prikaži</button>
+</form>
+
+{% if zapisi %}
+<table>
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Simptom</th>
+            <th>Jakost</th>
+            <th>Opomba</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for zapis in zapisi %}
+        <tr>
+            <td>{{ zapis.datum }}</td>
+            <td>{{ zapis.simptom_naziv }}</td>
+            <td>{{ zapis.jakost }}</td>
+            <td>{{ zapis.opomba or "–" }}</td>
+            <td>
+                <a href="{{ url_for('uredi_zapis_simptoma', zapis_id=zapis.id) }}">Uredi</a>
+                <form method="post" action="{{ url_for('izbrisi_zapis_simptoma', zapis_id=zapis.id) }}"
+                      onsubmit="return confirm('Izbrišeš ta zapis?')">
+                    <button type="submit">Izbriši</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>V izbranem obdobju ni zapisov.</p>
+{% endif %}
+{% endblock %}
