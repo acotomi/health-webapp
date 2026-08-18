@@ -148,3 +148,19 @@ td button {
     background-color: var(--barva-uspeh-ozadje);
     border-color: var(--barva-uspeh-obroba);
 }
+
+@media print {
+    header,
+    form,
+    .ne-tiskaj {
+        display: none;
+    }
+
+    .container {
+        max-width: none;
+    }
+
+    body {
+        font-size: 11pt;
+    }
+}

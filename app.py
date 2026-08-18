@@ -478,5 +478,63 @@ def izbrisi_zapis_simptoma(zapis_id):
     return redirect(url_for("zgodovina"))
 
 
+@app.route("/povzetek")
+@prijava_zahtevana
+def povzetek():
+    baza = db.get_db()
+    danes = date.today()
+
+    try:
+        zacetni_datum = datetime.strptime(request.args.get("od", ""), "%Y-%m-%d").date()
+        koncni_datum = datetime.strptime(request.args.get("do", ""), "%Y-%m-%d").date()
+        stevilo_dni = (koncni_datum - zacetni_datum).days + 1
+        if not (0 < stevilo_dni <= 366):
+            raise ValueError
+    except ValueError:
+        koncni_datum = danes
+        zacetni_datum = danes - timedelta(days=30)
+        stevilo_dni = 31
+
+    zacetek = zacetni_datum.isoformat()
+    konec = koncni_datum.isoformat()
+    seznam_datumov = [(zacetni_datum + timedelta(days=i)).isoformat() for i in range(stevilo_dni)]
+
+    zapisi = baza.execute(
+        """
+        SELECT z.datum, z.jakost, z.opomba, s.naziv AS simptom_naziv
+        FROM zapis_simptoma z
+        JOIN simptom s ON z.simptom_id = s.id
+        WHERE s.uporabnik_id = ? AND z.datum BETWEEN ? AND ?
+        ORDER BY z.datum, s.naziv
+        """,
+        (g.uporabnik["id"], zacetek, konec),
+    ).fetchall()
+
+    jakosti_po_simptomu = {}
+    for zapis in zapisi:
+        jakosti_po_simptomu.setdefault(zapis["simptom_naziv"], {})[zapis["datum"]] = zapis["jakost"]
+
+    nizi = [
+        {"naziv": naziv, "vrednosti": [vrednosti.get(d) for d in seznam_datumov]}
+        for naziv, vrednosti in jakosti_po_simptomu.items()
+    ]
+
+    podatki_grafa = {"datumi": seznam_datumov, "nizi": nizi}
+
+    aktivne_terapije = baza.execute(
+        "SELECT naziv, odmerek, pogostost FROM terapija WHERE uporabnik_id = ? AND aktivna = 1 ORDER BY naziv",
+        (g.uporabnik["id"],),
+    ).fetchall()
+
+    return render_template(
+        "povzetek.html",
+        zapisi=zapisi,
+        podatki_grafa=podatki_grafa,
+        terapije=aktivne_terapije,
+        zacetek=zacetek,
+        konec=konec,
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)

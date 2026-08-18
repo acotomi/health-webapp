@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block naslov %}Povzetek{% endblock %}
+
+{% block vsebina %}
+<h2>Povzetek za obdobje {{ zacetek }} – {{ konec }}</h2>
+
+<form method="get" class="ne-tiskaj">
+    <label for="od">Od</label>
+    <input type="date" id="od" name="od" value="{{ zacetek }}">
+
+    <label for="do">Do</label>
+    <input type="date" id="do" name="do" value="{{ konec }}">
+
+    <button type="submit">Prikaži</button>
+</form>
+
+<p class="ne-tiskaj"><button type="button" onclick="window.print()">Natisni / shrani kot PDF</button></p>
+
+<h3>Gibanje jakosti simptomov</h3>
+{% if podatki_grafa.nizi %}
+<canvas id="graf-simptomov" height="220"></canvas>
+<p class="pojasnilo">
+    Barvna območja prikazujejo grobo jakost: zeleno = blaga (0–3), rumeno =
+    zmerna (4–6), rdeče = huda (7–10).
+</p>
+{% else %}
+<p>V izbranem obdobju ni zapisov simptomov.</p>
+{% endif %}
+
+<h3>Zapisi simptomov</h3>
+{% if zapisi %}
+<table>
+    <thead>
+        <tr><th>Datum</th><th>Simptom</th><th>Jakost</th><th>Opomba</th></tr>
+    </thead>
+    <tbody>
+        {% for zapis in zapisi %}
+        <tr>
+            <td>{{ zapis.datum }}</td>
+            <td>{{ zapis.simptom_naziv }}</td>
+            <td>{{ zapis.jakost }}</td>
+            <td>{{ zapis.opomba or "–" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Ni zapisov v izbranem obdobju.</p>
+{% endif %}
+
+<h3>Trenutne terapije</h3>
+{% if terapije %}
+<table>
+    <thead>
+        <tr><th>Naziv</th><th>Odmerek</th><th>Pogostost</th></tr>
+    </thead>
+    <tbody>
+        {% for terapija in terapije %}
+        <tr>
+            <td>{{ terapija.naziv }}</td>
+            <td>{{ terapija.odmerek or "–" }}</td>
+            <td>{{ terapija.pogostost or "–" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Trenutno ni aktivnih terapij.</p>
+{% endif %}
+
+<script>
+    const podatkiGrafa = {{ podatki_grafa | tojson }};
+</script>
+<script src="{{ url_for('static', filename='chart.js') }}"></script>
+<script src="{{ url_for('static', filename='graf.js') }}"></script>
+<script>
+    narisiGrafSimptomov(podatkiGrafa);
+</script>
+{% endblock %}
