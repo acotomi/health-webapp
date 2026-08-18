@@ -39,7 +39,50 @@ def prijava_zahtevana(pogled):
 @app.route("/")
 @prijava_zahtevana
 def domov():
-    return render_template("domov.html")
+    baza = db.get_db()
+    danes = date.today()
+
+    zacetek = danes - timedelta(days=29)
+    seznam_datumov = [(zacetek + timedelta(days=i)).isoformat() for i in range(30)]
+
+    vrstice = baza.execute(
+        """
+        SELECT s.naziv AS simptom_naziv, z.datum, z.jakost
+        FROM zapis_simptoma z
+        JOIN simptom s ON z.simptom_id = s.id
+        WHERE s.uporabnik_id = ? AND z.datum >= ?
+        ORDER BY s.naziv, z.datum
+        """,
+        (g.uporabnik["id"], zacetek.isoformat()),
+    ).fetchall()
+
+    jakosti_po_simptomu = {}
+    for vrstica in vrstice:
+        jakosti_po_simptomu.setdefault(vrstica["simptom_naziv"], {})[vrstica["datum"]] = vrstica["jakost"]
+
+    nizi = [
+        {
+            "naziv": naziv,
+            "vrednosti": [vrednosti_po_datumu.get(datum) for datum in seznam_datumov],
+        }
+        for naziv, vrednosti_po_datumu in jakosti_po_simptomu.items()
+    ]
+
+    podatki_grafa = {"datumi": seznam_datumov, "nizi": nizi}
+
+    danasnje_terapije = baza.execute(
+        """
+        SELECT t.id, t.naziv,
+               (SELECT COUNT(*) FROM zapis_terapije z
+                WHERE z.terapija_id = t.id AND z.datum = ?) AS vzeto_danes
+        FROM terapija t
+        WHERE t.uporabnik_id = ? AND t.aktivna = 1
+        ORDER BY t.naziv
+        """,
+        (danes.isoformat(), g.uporabnik["id"]),
+    ).fetchall()
+
+    return render_template("domov.html", podatki_grafa=podatki_grafa, terapije=danasnje_terapije)
 
 
 @app.route("/prijava", methods=("GET", "POST"))

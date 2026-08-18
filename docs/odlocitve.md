@@ -67,3 +67,27 @@ lastnimi podatki, izbris mora biti nameren in eksploziten, ne stranski učinek).
 
 **Za katero poglavje:** 4.3 (tehnološka zasnova), 4.4 (vmesnik — utemeljitev
 treh korakov).
+
+## 2026-08-18 — Chart.js shranjen lokalno, ne prek CDN
+
+**Vprašanje:** Ali naj se Chart.js (za graf gibanja jakosti simptomov, F6) naloži
+prek CDN povezave ali naj bo shranjen lokalno v `static/`?
+
+**Odločitev:** Chart.js je prenesen in shranjen lokalno v `static/`, brez
+povezave na CDN.
+
+**Utemeljitev:**
+- Neodvisnost od omrežja: aplikacija mora delovati brez internetne povezave —
+  tudi na dan zagovora, kjer internetna povezava ni zagotovljena.
+- Preprečitev razkritja podatkov o uporabi tretji osebi: pri nalaganju skripte
+  s CDN bi ponudnik CDN ob vsakem obisku strani videl IP naslov in čas dostopa
+  uporabnika, kar je v nasprotju z načelom "brez zunanjih storitev" iz
+  CLAUDE.md in z načelom minimizacije razkritja osebnih podatkov (GDPR, člen
+  5). Ker gre za aplikacijo, ki obravnava zdravstvene podatke (posebna vrsta
+  osebnih podatkov, člen 9 GDPR), je ta razlog pri zagovoru tehtnejši od
+  praktičnega razloga neodvisnosti od omrežja.
+
+**Zavrnjene možnosti:** Nalaganje Chart.js prek javnega CDN (npr.
+cdn.jsdelivr.net) — zavrnjeno iz obeh zgornjih razlogov.
+
+**Za katero poglavje:** 4.3 (tehnološka zasnova), 4.5 (varstvo podatkov).

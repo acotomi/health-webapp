@@ -4,7 +4,50 @@
 
 {% block vsebina %}
 <h2>Pozdravljen, {{ g.uporabnik.uporabnisko_ime }}</h2>
-<p>Tu bo nadzorna plošča: graf zadnjih 30 dni in današnje terapije.</p>
 
 <p><a class="gumb" href="{{ url_for('nov_zapis_simptoma') }}">Nov zapis simptoma</a></p>
+
+<h3>Gibanje jakosti simptomov (zadnjih 30 dni)</h3>
+{% if podatki_grafa.nizi %}
+<canvas id="graf-simptomov" height="220"></canvas>
+<p class="pojasnilo">
+    Barvna območja prikazujejo grobo jakost: zeleno = blaga (0–3), rumeno =
+    zmerna (4–6), rdeče = huda (7–10).
+</p>
+{% else %}
+<p>Ni še podatkov za prikaz. Dodaj svoj prvi zapis simptoma.</p>
+{% endif %}
+
+<h3>Današnje terapije</h3>
+{% if terapije %}
+<table>
+    <thead>
+        <tr><th>Naziv</th><th>Danes vzeto</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for terapija in terapije %}
+        <tr>
+            <td>{{ terapija.naziv }}</td>
+            <td>{{ terapija.vzeto_danes }}</td>
+            <td>
+                <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
+                    <button type="submit">Vzeto</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nimaš aktivnih terapij.</p>
+{% endif %}
+
+<script>
+    const podatkiGrafa = {{ podatki_grafa | tojson }};
+</script>
+<script src="{{ url_for('static', filename='chart.js') }}"></script>
+<script src="{{ url_for('static', filename='graf.js') }}"></script>
+<script>
+    narisiGrafSimptomov(podatkiGrafa);
+</script>
 {% endblock %}
