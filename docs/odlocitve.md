@@ -125,3 +125,74 @@ funkcionalnost, ki jo je mogoče doseči v ducatu vrstic). Zaklep prijave po
 neuspelih poskusih (zavrnjeno za zdaj, glej utemeljitev).
 
 **Za katero poglavje:** 4.5 (varstvo podatkov), 5 (razprava, omejitve).
+
+## 2026-08-19 — Enotna oblika izpisa datuma
+
+**Vprašanje:** Datumi so bili v tabeli zgodovine, povzetka in na oznakah grafa
+izpisani v surovi obliki ISO (YYYY-MM-DD), kar ni domača slovenska oblika.
+
+**Odločitev:** Dodana je ena pomožna funkcija `oblikuj_datum_sl()` v `app.py`,
+registrirana kot Jinja filter `datum_sl`. Uporablja se v tabeli zgodovine,
+tabeli povzetka, naslovu obdobja povzetka in pri pripravi oznak na osi x
+grafa — vsi izpišejo datum v obliki „19. 8. 2026". Polja `<input type="date">`
+niso spremenjena, ker njihov prikaz nadzoruje brskalnik glede na jezik
+sistema.
+
+**Utemeljitev:** N2 (razumljiv vmesnik, brez nepotrebnih elementov) — domača
+oblika datuma je berljivejša od ISO zapisa za končnega uporabnika. Ena sama
+pomožna funkcija namesto ponavljanja oblikovanja v vsaki predlogi posebej
+zmanjšuje tveganje, da bi bila kdaj oblika neusklajena med zasloni.
+
+**Zavrnjene možnosti:** Oblikovanje datuma neposredno v vsaki predlogi
+(zavrnjeno — podvajanje kode, tvegano za neskladnost).
+
+**Za katero poglavje:** 4.4 (vmesnik).
+
+## 2026-08-19 — Barvna paleta grafa (črte simptomov)
+
+**Vprašanje:** Prvotna paleta barv za črte posameznih simptomov je vključevala
+oranžno-rdečo in rožnato, ki sta se vizualno prekrivali z rdečim ozadjem
+območja "huda (7–10)" jakosti.
+
+**Odločitev:** Paleta črt je zamenjana z modro, vijolično, oranžno, temno
+zeleno in rjavo (`static/graf.js`) — namenoma brez rdeče/rožnate odtenkov.
+Dodana je tudi oznaka osi y "Jakost (0–10)".
+
+**Utemeljitev:** N2 in F6 (razumljiv prikaz z označenimi območji jakosti) —
+če se barva črte in barva ozadja ujemata, uporabnik ne more zanesljivo
+razbrati, kje je meja območja in kje poteka črta simptoma. Ločena barvna
+skupina za črte je nujna za berljivost grafa.
+
+**Zavrnjene možnosti:** Obdržati prvotno paleto (zavrnjeno zaradi vizualnega
+prekrivanja z ozadjem, opaženega pri pregledu vmesnika).
+
+**Za katero poglavje:** 4.4 (vmesnik).
+
+## 2026-08-19 — Brisanje vrste simptoma in terapije je RESTRICT, ne kaskadno
+
+**Vprašanje:** kaj je bilo treba odločiti
+
+Kako naj se aplikacija odzove, če uporabnik poskuša izbrisati vrsto simptoma
+(ali terapijo), ki ima obstoječe zapise?
+
+**Odločitev:** kaj je bilo izbrano
+
+Brisanje vrste simptoma z obstoječimi zapisi je zavrnjeno (RESTRICT), ne
+kaskadno. Enako pravilo velja za terapijo z obstoječimi zapisi jemanja —
+brisanje je dodano kot pravo brisanje (ne le "Ukini"), a prav tako zavrnjeno,
+če terapija ima zapise v `zapis_terapije`. Sporočilo o zavrnitvi navede točno
+število obstoječih zapisov.
+
+**Utemeljitev:** zakaj; kadar je mogoče, poveži z zahtevo (F1–F8, N1–N6) ali
+z ugotovitvijo iz poglavja 3
+
+Preprečitev nenamerne izgube zdravstvenih podatkov; izguba mora biti
+posledica zavestnega dejanja uporabnika. Povezano z N6 in z načelom
+privzetega varstva podatkov (člen 25 GDPR).
+
+**Zavrnjene možnosti:** kaj še je bilo v igri in zakaj ni bilo izbrano
+
+ON DELETE CASCADE — zavrnjena, ker bi uporabnik lahko tiho izgubil mesece
+zapisov.
+
+**Za katero poglavje:** 4.3.2 in 4.5.

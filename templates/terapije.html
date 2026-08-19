@@ -33,11 +33,17 @@
                 </form>
                 {% endif %}
                 <a href="{{ url_for('uredi_terapijo', terapija_id=terapija.id) }}">Uredi</a>
+                <a href="{{ url_for('zgodovina_terapije', terapija_id=terapija.id) }}">Zgodovina</a>
                 <form method="post" action="{{ url_for('preklopi_terapijo', terapija_id=terapija.id) }}">
                     <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
                     <button type="submit" class="{{ 'gumb-nevarno' if terapija.aktivna else '' }}">
                         {{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}
                     </button>
+                </form>
+                <form method="post" action="{{ url_for('izbrisi_terapijo', terapija_id=terapija.id) }}"
+                      onsubmit="return confirm('Izbrišete to terapijo?')">
+                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                    <button type="submit" class="gumb-nevarno">Izbriši</button>
                 </form>
             </td>
         </tr>
@@ -45,7 +51,7 @@
     </tbody>
 </table>
 {% else %}
-<p>Še nimaš dodane nobene terapije.</p>
+<p>Še nimate dodane nobene terapije.</p>
 {% endif %}
 
 <h2>Dodaj terapijo</h2>

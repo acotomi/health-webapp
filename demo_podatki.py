@@ -61,7 +61,7 @@ def zadnjih_n_dni(stevilo_dni):
 
 
 def ustvari_sladkorno_bolezen(baza):
-    uporabnik_id = ustvari_uporabnika(baza, "sladkorna_bolezen")
+    uporabnik_id = ustvari_uporabnika(baza, "demo1")
     utrujenost_id = dodaj_simptom(baza, uporabnik_id, "utrujenost")
     zeja_id = dodaj_simptom(baza, uporabnik_id, "žeja")
     omotica_id = dodaj_simptom(baza, uporabnik_id, "omotica")
@@ -86,7 +86,7 @@ def ustvari_sladkorno_bolezen(baza):
 
 
 def ustvari_migreno(baza):
-    uporabnik_id = ustvari_uporabnika(baza, "migrena")
+    uporabnik_id = ustvari_uporabnika(baza, "demo2")
     glavobol_id = dodaj_simptom(baza, uporabnik_id, "glavobol")
     slabost_id = dodaj_simptom(baza, uporabnik_id, "slabost")
     svetloba_id = dodaj_simptom(baza, uporabnik_id, "preobčutljivost na svetlobo")
@@ -112,7 +112,7 @@ def ustvari_migreno(baza):
 
 
 def ustvari_revmatoidni_artritis(baza):
-    uporabnik_id = ustvari_uporabnika(baza, "revmatoidni_artritis")
+    uporabnik_id = ustvari_uporabnika(baza, "demo3")
     bolecine_id = dodaj_simptom(baza, uporabnik_id, "bolečine v sklepih")
     okorelost_id = dodaj_simptom(baza, uporabnik_id, "jutranja okorelost")
     utrujenost_id = dodaj_simptom(baza, uporabnik_id, "utrujenost")
@@ -144,5 +144,5 @@ with app.app_context():
 
     baza.commit()
 
-print("Demonstracijski uporabniki ustvarjeni: sladkorna_bolezen, migrena, revmatoidni_artritis")
+print("Demonstracijski uporabniki ustvarjeni: demo1, demo2, demo3")
 print(f"Geslo za vse: {GESLO}")

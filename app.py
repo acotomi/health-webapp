@@ -18,6 +18,15 @@ os.makedirs(app.instance_path, exist_ok=True)
 db.init_app(app)
 
 
+def oblikuj_datum_sl(datum_iso):
+    """Datum iz oblike YYYY-MM-DD v slovensko obliko, npr. '19. 8. 2026'."""
+    d = datetime.strptime(datum_iso, "%Y-%m-%d").date()
+    return f"{d.day}. {d.month}. {d.year}"
+
+
+app.jinja_env.filters["datum_sl"] = oblikuj_datum_sl
+
+
 def pridobi_csrf_zeton():
     """Vrne CSRF žeton trenutne seje; ob prvem klicu ga ustvari."""
     if "csrf_zeton" not in session:
@@ -49,6 +58,17 @@ def nalozi_prijavljenega_uporabnika():
         g.uporabnik = db.get_db().execute(
             "SELECT id, uporabnisko_ime FROM uporabnik WHERE id = ?", (uporabnik_id,)
         ).fetchone()
+
+
+def stevilo_zapisov_besedilo(stevilo):
+    """Slovnično pravilna oblika '<število> shranjen(a/e/ih) zapis(a/e/ov)'."""
+    if stevilo == 1:
+        return "1 shranjen zapis"
+    if stevilo == 2:
+        return "2 shranjena zapisa"
+    if stevilo in (3, 4):
+        return f"{stevilo} shranjene zapise"
+    return f"{stevilo} shranjenih zapisov"
 
 
 def prijava_zahtevana(pogled):
@@ -93,7 +113,7 @@ def domov():
         for naziv, vrednosti_po_datumu in jakosti_po_simptomu.items()
     ]
 
-    podatki_grafa = {"datumi": seznam_datumov, "nizi": nizi}
+    podatki_grafa = {"datumi": [oblikuj_datum_sl(d) for d in seznam_datumov], "nizi": nizi}
 
     danasnje_terapije = baza.execute(
         """
@@ -167,7 +187,7 @@ def registracija():
             except sqlite3.IntegrityError:
                 napaka = f"Uporabniško ime '{uporabnisko_ime}' je že zasedeno."
             else:
-                flash("Račun je bil uspešno ustvarjen. Zdaj se lahko prijaviš.", "uspeh")
+                flash("Račun je bil uspešno ustvarjen. Zdaj se lahko prijavite.", "uspeh")
                 return redirect(url_for("prijava"))
 
         flash(napaka, "napaka")
@@ -226,8 +246,8 @@ def izbrisi_simptom(simptom_id):
 
         if stevilo_zapisov > 0:
             flash(
-                "Simptoma ni mogoče izbrisati, ker ima shranjene zapise. "
-                "Najprej izbriši njegove zapise v Zgodovini.",
+                f"Simptoma ni mogoče izbrisati, ker ima {stevilo_zapisov_besedilo(stevilo_zapisov)}. "
+                "Najprej izbrišite njegove zapise v Zgodovini.",
                 "napaka",
             )
         else:
@@ -251,7 +271,7 @@ def nov_zapis_simptoma():
     ).fetchall()
 
     if not seznam_simptomov:
-        flash("Najprej dodaj vsaj eno vrsto simptoma.", "napaka")
+        flash("Najprej dodajte vsaj eno vrsto simptoma.", "napaka")
         return redirect(url_for("simptomi"))
 
     if request.method == "POST":
@@ -263,7 +283,7 @@ def nov_zapis_simptoma():
 
         napaka = None
         if not veljaven_simptom:
-            napaka = "Izberi veljaven simptom."
+            napaka = "Izberite veljaven simptom."
         elif jakost is None or not (0 <= jakost <= 10):
             napaka = "Jakost mora biti med 0 in 10."
 
@@ -351,6 +371,39 @@ def uredi_terapijo(terapija_id):
     return render_template("uredi_terapijo.html", terapija=terapija)
 
 
+@app.route("/terapije/<int:terapija_id>/izbrisi", methods=("POST",))
+@prijava_zahtevana
+def izbrisi_terapijo(terapija_id):
+    baza = db.get_db()
+    terapija = baza.execute(
+        "SELECT id FROM terapija WHERE id = ? AND uporabnik_id = ?",
+        (terapija_id, g.uporabnik["id"]),
+    ).fetchone()
+
+    if terapija is None:
+        flash("Terapija ne obstaja.", "napaka")
+    else:
+        stevilo_zapisov = baza.execute(
+            "SELECT COUNT(*) FROM zapis_terapije WHERE terapija_id = ?", (terapija_id,)
+        ).fetchone()[0]
+
+        if stevilo_zapisov > 0:
+            flash(
+                f"Terapije ni mogoče izbrisati, ker ima {stevilo_zapisov_besedilo(stevilo_zapisov)} "
+                "o jemanju. Najprej jih izbrišite v Zgodovini jemanja ali terapijo ukinite.",
+                "napaka",
+            )
+        else:
+            baza.execute(
+                "DELETE FROM terapija WHERE id = ? AND uporabnik_id = ?",
+                (terapija_id, g.uporabnik["id"]),
+            )
+            baza.commit()
+            flash("Terapija je izbrisana.", "uspeh")
+
+    return redirect(url_for("terapije"))
+
+
 @app.route("/terapije/<int:terapija_id>/preklopi", methods=("POST",))
 @prijava_zahtevana
 def preklopi_terapijo(terapija_id):
@@ -392,9 +445,53 @@ def oznaci_vzeto(terapija_id):
             (terapija_id, date.today().isoformat()),
         )
         baza.commit()
-        flash("Zabeleženo, da si vzel terapijo.", "uspeh")
+        flash("Jemanje terapije je zabeleženo.", "uspeh")
 
     return redirect(url_for("terapije"))
+
+
+@app.route("/terapije/<int:terapija_id>/zgodovina")
+@prijava_zahtevana
+def zgodovina_terapije(terapija_id):
+    baza = db.get_db()
+    terapija = baza.execute(
+        "SELECT id, naziv FROM terapija WHERE id = ? AND uporabnik_id = ?",
+        (terapija_id, g.uporabnik["id"]),
+    ).fetchone()
+
+    if terapija is None:
+        flash("Terapija ne obstaja.", "napaka")
+        return redirect(url_for("terapije"))
+
+    zapisi = baza.execute(
+        "SELECT id, datum FROM zapis_terapije WHERE terapija_id = ? ORDER BY datum DESC, id DESC",
+        (terapija_id,),
+    ).fetchall()
+
+    return render_template("zgodovina_terapije.html", terapija=terapija, zapisi=zapisi)
+
+
+@app.route("/terapije/<int:terapija_id>/zgodovina/<int:zapis_id>/izbrisi", methods=("POST",))
+@prijava_zahtevana
+def izbrisi_zapis_terapije(terapija_id, zapis_id):
+    baza = db.get_db()
+    zapis = baza.execute(
+        """
+        SELECT z.id FROM zapis_terapije z
+        JOIN terapija t ON z.terapija_id = t.id
+        WHERE z.id = ? AND z.terapija_id = ? AND t.uporabnik_id = ?
+        """,
+        (zapis_id, terapija_id, g.uporabnik["id"]),
+    ).fetchone()
+
+    if zapis is None:
+        flash("Zapis ne obstaja.", "napaka")
+    else:
+        baza.execute("DELETE FROM zapis_terapije WHERE id = ?", (zapis_id,))
+        baza.commit()
+        flash("Zapis o jemanju je izbrisan.", "uspeh")
+
+    return redirect(url_for("zgodovina_terapije", terapija_id=terapija_id))
 
 
 @app.route("/zgodovina")
@@ -453,14 +550,14 @@ def uredi_zapis_simptoma(zapis_id):
 
         napaka = None
         if not veljaven_simptom:
-            napaka = "Izberi veljaven simptom."
+            napaka = "Izberite veljaven simptom."
         elif jakost is None or not (0 <= jakost <= 10):
             napaka = "Jakost mora biti med 0 in 10."
         else:
             try:
                 datetime.strptime(datum, "%Y-%m-%d")
             except ValueError:
-                napaka = "Vnesi veljaven datum."
+                napaka = "Vnesite veljaven datum."
 
         if napaka is None:
             baza.execute(
@@ -544,7 +641,7 @@ def povzetek():
         for naziv, vrednosti in jakosti_po_simptomu.items()
     ]
 
-    podatki_grafa = {"datumi": seznam_datumov, "nizi": nizi}
+    podatki_grafa = {"datumi": [oblikuj_datum_sl(d) for d in seznam_datumov], "nizi": nizi}
 
     aktivne_terapije = baza.execute(
         "SELECT naziv, odmerek, pogostost FROM terapija WHERE uporabnik_id = ? AND aktivna = 1 ORDER BY naziv",
@@ -568,7 +665,7 @@ def stran_ne_obstaja(napaka):
 
 @app.errorhandler(400)
 def neveljavna_zahteva(napaka):
-    return render_template("napaka.html", sporocilo="Zahteva ni veljavna. Poskusi znova."), 400
+    return render_template("napaka.html", sporocilo="Zahteva ni veljavna. Poskusite znova."), 400
 
 
 if __name__ == "__main__":

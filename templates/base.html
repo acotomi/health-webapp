@@ -15,11 +15,13 @@
                 <a href="{{ url_for('terapije') }}">Terapije</a>
                 <a href="{{ url_for('zgodovina') }}">Zgodovina</a>
                 <a href="{{ url_for('povzetek') }}">Povzetek</a>
-                <span>{{ g.uporabnik.uporabnisko_ime }}</span>
-                <form method="post" action="{{ url_for('odjava') }}">
-                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                    <button type="submit">Odjava</button>
-                </form>
+                <span class="nav-uporabnik">
+                    <span class="nav-ime">{{ g.uporabnik.uporabnisko_ime }}</span>
+                    <form method="post" action="{{ url_for('odjava') }}">
+                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                        <button type="submit">Odjava</button>
+                    </form>
+                </span>
             {% else %}
                 <a href="{{ url_for('prijava') }}">Prijava</a>
                 <a href="{{ url_for('registracija') }}">Registracija</a>

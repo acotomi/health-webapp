@@ -29,14 +29,14 @@
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td>{{ zapis.datum }}</td>
+            <td>{{ zapis.datum | datum_sl }}</td>
             <td>{{ zapis.simptom_naziv }}</td>
             <td>{{ zapis.jakost }}</td>
             <td>{{ zapis.opomba or "–" }}</td>
             <td>
                 <a href="{{ url_for('uredi_zapis_simptoma', zapis_id=zapis.id) }}">Uredi</a>
                 <form method="post" action="{{ url_for('izbrisi_zapis_simptoma', zapis_id=zapis.id) }}"
-                      onsubmit="return confirm('Izbrišeš ta zapis?')">
+                      onsubmit="return confirm('Izbrišete ta zapis?')">
                     <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
                     <button type="submit" class="gumb-nevarno">Izbriši</button>
                 </form>

@@ -3,7 +3,7 @@
 {% block naslov %}Nadzorna plošča{% endblock %}
 
 {% block vsebina %}
-<h2>Pozdravljen, {{ g.uporabnik.uporabnisko_ime }}</h2>
+<h2>Pozdravljeni, {{ g.uporabnik.uporabnisko_ime }}</h2>
 
 <p><a class="gumb" href="{{ url_for('nov_zapis_simptoma') }}">Nov zapis simptoma</a></p>
 
@@ -15,7 +15,7 @@
     zmerna (4–6), rdeče = huda (7–10).
 </p>
 {% else %}
-<p>Ni še podatkov za prikaz. Dodaj svoj prvi zapis simptoma.</p>
+<p>Ni še podatkov za prikaz. Dodajte svoj prvi zapis simptoma.</p>
 {% endif %}
 
 <h3>Današnje terapije</h3>
@@ -40,7 +40,7 @@
     </tbody>
 </table>
 {% else %}
-<p>Nimaš aktivnih terapij.</p>
+<p>Nimate aktivnih terapij.</p>
 {% endif %}
 
 <script>

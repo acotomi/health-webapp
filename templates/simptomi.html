@@ -16,7 +16,7 @@
             <td>{{ simptom.naziv }}</td>
             <td>
                 <form method="post" action="{{ url_for('izbrisi_simptom', simptom_id=simptom.id) }}"
-                      onsubmit="return confirm('Izbrišeš ta simptom?')">
+                      onsubmit="return confirm('Izbrišete ta simptom?')">
                     <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
                     <button type="submit" class="gumb-nevarno">Izbriši</button>
                 </form>
@@ -26,7 +26,7 @@
     </tbody>
 </table>
 {% else %}
-<p>Še nimaš dodanega nobenega simptoma.</p>
+<p>Še nimate dodanega nobenega simptoma.</p>
 {% endif %}
 
 <h2>Dodaj simptom</h2>

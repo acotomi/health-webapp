@@ -3,7 +3,7 @@
 {% block naslov %}Povzetek{% endblock %}
 
 {% block vsebina %}
-<h2>Povzetek za obdobje {{ zacetek }} – {{ konec }}</h2>
+<h2>Povzetek za obdobje {{ zacetek | datum_sl }} – {{ konec | datum_sl }}</h2>
 
 <form method="get" class="ne-tiskaj">
     <label for="od">Od</label>
@@ -37,7 +37,7 @@
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td>{{ zapis.datum }}</td>
+            <td>{{ zapis.datum | datum_sl }}</td>
             <td>{{ zapis.simptom_naziv }}</td>
             <td>{{ zapis.jakost }}</td>
             <td>{{ zapis.opomba or "–" }}</td>

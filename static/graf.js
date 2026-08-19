@@ -32,7 +32,8 @@ function narisiGrafSimptomov(podatki) {
         return;
     }
 
-    const barvePoNizih = ["#2b6cb0", "#7c3aed", "#c2410c", "#0f766e", "#be185d"];
+    // Namenoma brez rdeče/rožnate - ozadje že uporablja rdečo za območje "huda".
+    const barvePoNizih = ["#2563eb", "#7c3aed", "#d97706", "#15803d", "#78350f"];
 
     new Chart(platno, {
         type: "line",
@@ -49,7 +50,12 @@ function narisiGrafSimptomov(podatki) {
         },
         options: {
             scales: {
-                y: { min: 0, max: 10, ticks: { stepSize: 1 } },
+                y: {
+                    min: 0,
+                    max: 10,
+                    ticks: { stepSize: 1 },
+                    title: { display: true, text: "Jakost (0–10)" },
+                },
             },
         },
         plugins: [vtaknjenoObmocja],

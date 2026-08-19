@@ -55,6 +55,18 @@ header nav form {
     margin: 0;
 }
 
+.nav-uporabnik {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 1.25rem;
+    padding-left: 1.25rem;
+    border-left: 1px solid var(--barva-obroba);
+}
+
+.nav-ime {
+    font-weight: 600;
+}
+
 header nav form button {
     margin: 0 0 0 1rem;
     padding: 0;
