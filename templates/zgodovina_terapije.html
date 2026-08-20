@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_ikone.html" import svincnik, kos %}
 
 {% block naslov %}Zgodovina jemanja{% endblock %}
 
@@ -10,19 +11,28 @@
 <div class="tabela-okvir">
 <table class="odzivna-tabela">
     <thead>
-        <tr><th>Datum</th><th></th></tr>
+        <tr><th>Datum in ura</th><th></th></tr>
     </thead>
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td data-label="Datum" class="celica-datum">{{ zapis.datum | datum_sl }}</td>
+            <td data-label="Datum in ura" class="celica-datum">{{ zapis.casovna_znacka | casovna_znacka_sl }}</td>
             <td class="celica-dejanja">
                 <div class="dejanja">
+                    <a class="gumb gumb-ikona gumb-sekundaren"
+                       href="{{ url_for('uredi_zapis_terapije', terapija_id=terapija.id, zapis_id=zapis.id) }}"
+                       aria-label="Uredi">
+                        {{ svincnik() }}
+                        <span class="namig" aria-hidden="true">Uredi</span>
+                    </a>
                     <form method="post"
                           action="{{ url_for('izbrisi_zapis_terapije', terapija_id=terapija.id, zapis_id=zapis.id) }}"
                           onsubmit="return confirm('Izbrišete ta zapis o jemanju?')">
                         <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit" class="gumb-majhen gumb-nevarno">Izbriši</button>
+                        <button type="submit" class="gumb-ikona gumb-nevarno" aria-label="Izbriši">
+                            {{ kos() }}
+                            <span class="namig" aria-hidden="true">Izbriši</span>
+                        </button>
                     </form>
                 </div>
             </td>
@@ -31,10 +41,6 @@
     </tbody>
 </table>
 </div>
-<p class="pojasnilo">
-    Zapisi hranijo samo datum, ne ure. Če je bila terapija vzeta večkrat isti
-    dan, se ta datum pojavi večkrat.
-</p>
 {% else %}
 <p>Za to terapijo še ni zapisov o jemanju.</p>
 {% endif %}

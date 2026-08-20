@@ -37,6 +37,6 @@ CREATE TABLE terapija (
 CREATE TABLE zapis_terapije (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     terapija_id INTEGER NOT NULL,
-    datum TEXT NOT NULL,
+    casovna_znacka TEXT NOT NULL,
     FOREIGN KEY (terapija_id) REFERENCES terapija (id)
 );

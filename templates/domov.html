@@ -1,6 +1,10 @@
 {% extends "base.html" %}
+{% from "_ikone.html" import kapsula %}
+{% from "_obvestila.html" import prikazi_obvestila %}
 
 {% block naslov %}Nadzorna plošča{% endblock %}
+
+{% block obvestila %}{% endblock %}
 
 {% block vsebina %}
 <div class="stran-srednja">
@@ -25,8 +29,9 @@
 {% endif %}
 </section>
 
-<section class="sklop">
+<section class="sklop" id="danes-terapije">
 <h3>Današnje terapije</h3>
+{{ prikazi_obvestila() }}
 {% if terapije %}
 <div class="tabela-okvir">
 <table class="odzivna-tabela">
@@ -42,7 +47,11 @@
                 <div class="dejanja">
                     <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
                         <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit" class="gumb-majhen">Vzeto</button>
+                        <input type="hidden" name="naslednja" value="domov">
+                        <button type="submit" class="gumb-ikona" aria-label="Vzeto">
+                            {{ kapsula() }}
+                            <span class="namig" aria-hidden="true">Vzeto</span>
+                        </button>
                     </form>
                 </div>
             </td>

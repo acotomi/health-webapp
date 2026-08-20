@@ -77,15 +77,21 @@ prek CDN povezave ali naj bo shranjen lokalno v `static/`?
 povezave na CDN.
 
 **Utemeljitev:**
-- Neodvisnost od omrežja: aplikacija mora delovati brez internetne povezave —
-  tudi na dan zagovora, kjer internetna povezava ni zagotovljena.
-- Preprečitev razkritja podatkov o uporabi tretji osebi: pri nalaganju skripte
-  s CDN bi ponudnik CDN ob vsakem obisku strani videl IP naslov in čas dostopa
-  uporabnika, kar je v nasprotju z načelom "brez zunanjih storitev" iz
-  CLAUDE.md in z načelom minimizacije razkritja osebnih podatkov (GDPR, člen
-  5). Ker gre za aplikacijo, ki obravnava zdravstvene podatke (posebna vrsta
-  osebnih podatkov, člen 9 GDPR), je ta razlog pri zagovoru tehtnejši od
-  praktičnega razloga neodvisnosti od omrežja.
+- Varstvo osebnih podatkov: pri nalaganju skripte s CDN bi ponudnik ob vsakem
+  obisku strani prejel IP naslov uporabnika, čas dostopa in glavo referer,
+  torej podatek o tem, katero stran obiskuje. Ker gre za aplikacijo za
+  spremljanje zdravstvenega stanja, bi to tretji osebi razkrilo dejstvo, da
+  uporabnik tako aplikacijo uporablja. To ni skladno z zahtevo po vgrajenem
+  varstvu podatkov (Uredba (EU) 2016/679, člen 25).
+- Zanesljivost: zunanji strežnik je dodatna točka odpovedi, neodvisna od
+  strežnika aplikacije. Dostop do zunanjih domen je v zdravstvenih ustanovah
+  pogosto omejen, kar bi pomenilo okrnjeno delovanje kljub delujočemu
+  strežniku.
+- Varnost dobavne verige: sprememba datoteke na tujem strežniku bi pomenila
+  spremembo kode, ki se izvede v uporabnikovem brskalniku, brez vednosti
+  razvijalca.
+- Praktični razlog pri prototipu: ker prototip deluje lokalno, lokalno
+  shranjene datoteke omogočajo predstavitev brez internetne povezave.
 
 **Zavrnjene možnosti:** Nalaganje Chart.js prek javnega CDN (npr.
 cdn.jsdelivr.net) — zavrnjeno iz obeh zgornjih razlogov.
@@ -196,3 +202,151 @@ ON DELETE CASCADE — zavrnjena, ker bi uporabnik lahko tiho izgubil mesece
 zapisov.
 
 **Za katero poglavje:** 4.3.2 in 4.5.
+
+## 2026-08-20 — Barvna paleta grafa popravljena po mentorjevi pripombi
+
+**Vprašanje:** Mentor je pri pregledu vmesnika opozoril, da sta modra in
+vijolična v paleti črt grafa (izbrani 2026-08-19) preveč podobni, in
+predlagal paleto z močnejšim medsebojnim kontrastom ter preverbo za barvno
+slepoto.
+
+**Odločitev:** Paleta črt (`static/graf.js`) je zamenjana s temno modro,
+svetlo zelano, oranžno, rjavo in temno sivo — brez vijolične. Vsak niz ima
+poleg barve tudi svojo obliko točke (krog, kvadrat, trikotnik, zasukan
+kvadrat, zasukan križec; vgrajeni stili Chart.js).
+
+**Utemeljitev:** Izhaja iz mentorjeve pripombe pri pregledu vmesnika (slika
+1). Ločevanje po barvi in obliki hkrati je standardna praksa za dostopnost
+pri barvni slepoti — če se dve barvi zlijeta, oblika točke ostane
+razločljiva. Povezano z N2 in F6.
+
+**Zavrnjene možnosti:** Prejšnja paleta z modro/vijolično (zavrnjena, ker sta
+si preblizu, tudi ne le pri barvni slepoti).
+
+**Za katero poglavje:** 4.4 (vmesnik).
+
+## 2026-08-20 — Dosledna slovenska oblika datuma, dopolnjeno po mentorjevi pripombi
+
+**Vprašanje:** Mentor je pri pregledu (sliki 1 in 5) preveril, ali so vsi
+izpisi datumov v slovenski obliki, ne le tisti, popravljeni 2026-08-19.
+
+**Odločitev:** Po ponovnem pregledu vse kode je potrjeno, da so vsi izpisi
+uporabniku (tabele, naslovi, oznake grafa, sporočila) že dosledno v obliki
+"19. 8. 2026" prek `oblikuj_datum_sl`. Edina mesta s surovo ISO obliko so
+`value` atributi `<input type="date">` polj, kar je pravilno in namerno (glej
+naslednji vnos).
+
+**Utemeljitev:** Izhaja iz mentorjeve pripombe pri pregledu vmesnika.
+Potrditev obstoječe rešitve po neodvisnem pregledu je vredna zapisa, ker
+dokazuje, da je bila prvotna odločitev (2026-08-19) dosledno izvedena, ne le
+deklarirana.
+
+**Za katero poglavje:** 4.4 (vmesnik).
+
+## 2026-08-20 — Polja `<input type="date">` ostanejo native, brez jQuery UI
+
+**Vprašanje:** Mentor je opozoril, da `<input type="date">` prikaže datum v
+obliki, ki jo določa jezik brskalnika, ne aplikacija, in predlagal jQuery UI
+za enoten videz.
+
+**Odločitev:** Native `<input type="date">` ostaja nespremenjen. jQuery UI ni
+uveden.
+
+**Utemeljitev:** Izhaja iz mentorjeve pripombe pri pregledu vmesnika. Enaka
+logika kot pri odločitvi o Chart.js (2026-08-18): jQuery UI bi pomenil dve
+novi zunanji odvisnosti (jQuery + jQuery UI), dodatno površino za varnostne
+ranljivosti v dobavni verigi in vzdrževalno breme, ki presega korist v
+prototipu enega polja. Native element je preizkušen, dostopen (tipkovnica,
+bralniki zaslona, mobilni koledarski vnosnik) in ne zahteva lastne
+JavaScript kode. Omejitev (prikaz odvisen od jezika brskalnika/OS) je
+sprejeta kot znana pomanjkljivost, ne prikrita.
+
+**Zavrnjene možnosti:**
+- jQuery UI Datepicker (mentorjev predlog) — zavrnjen zaradi novih zunanjih
+  odvisnosti, v nasprotju z "novih odvisnosti ne dodajaj brez dogovora".
+- Lastna izbira datuma v čistem JavaScriptu, brez knjižnic — zavrnjena kot
+  nesorazmerno velik poseg (nova, netrivialna komponenta za vzdrževanje) za
+  korist, ki je zgolj kozmetična.
+- Besedilno polje z masko `dd. mm. llll` — zavrnjeno, ker bi izgubili native
+  mobilni koledarski vnosnik in del vgrajene dostopnosti, spet za zgolj
+  kozmetično korist.
+
+**Za katero poglavje:** 4.3 (tehnološka zasnova), 4.5 (varstvo podatkov — brez
+nepotrebnih zunanjih odvisnosti), 5 (razprava, omejitve).
+
+## 2026-08-20 — Ikonska dejanja v tabelah po mentorjevi pripombi
+
+**Vprašanje:** Mentor je predlagal, naj bodo dejanja v tabelah (Vzeto, Uredi,
+Izbriši/Ukini) ikone z besedilnim namigom, dostopne tudi s tipkovnico, brez
+ikonskih pisav ali CDN.
+
+**Odločitev:** Dodane so štiri ročno izdelane vgrajene SVG ikone (kapsula,
+svinčnik, koš, obnovi) prek Jinja makrov (`templates/_ikone.html`). Vsak
+ikonski gumb ima `aria-label` in CSS namig, ki se prikaže na `:hover` in
+`:focus-visible` (torej tudi pri navigaciji s tipkovnico). Vsi ikonski gumbi
+so veliki 44×44 px.
+
+**Utemeljitev:** Izhaja iz mentorjeve pripombe pri pregledu vmesnika (sliki 2
+in 4). Koš je uporabljen tako za "Izbriši" kot za "Ukini" (mentor ju je v
+pripombi združil), za "Ponovno aktiviraj" pa ločena ikona za obnovitev, ker
+bi koš pri tem dejanju zavajal (ne gre za uničenje podatkov). Velikost 44×44
+px sledi splošnemu priporočilu za najmanjšo dotikalno površino na mobilnih
+napravah.
+
+**Zavrnjene možnosti:** Ikonska pisava (npr. Font Awesome) — zavrnjena, ker
+bi pomenila novo zunanjo odvisnost (ali lokalno datoteko s celotnim naborom
+neuporabljenih ikon). Zunanja SVG ikonska knjižnica prek CDN — zavrnjena iz
+istega razloga kot pri Chart.js (brez zunanjih storitev).
+
+**Za katero poglavje:** 4.4 (vmesnik).
+
+## 2026-08-20 — Beleženje časa (ne le datuma) pri jemanju terapije
+
+**Vprašanje:** Mentor je predlagal, naj se namesto gumba "Vzeto" uporabi
+vnosno polje s številom vzetih odmerkov na dan, shranjeno ob dogodku `blur`.
+Po analizi (glej razpravo v seji) je bilo namesto tega odločeno, da se ob
+kliku na "Vzeto" poleg datuma zabeleži tudi ura.
+
+**Odločitev:** `zapis_terapije.datum` (TEXT, samo datum) je zamenjan z
+`zapis_terapije.casovna_znacka` (TEXT, oblika `YYYY-MM-DD HH:MM`), zajeto na
+strežniku (`datetime.now()`), ne v brskalniku. Uporabnik lahko uro
+posameznega zapisa naknadno uredi ali zapis izbriše na strani "Zgodovina
+jemanja terapije". Poizvedbi za "danes vzeto" (nadzorna plošča, seznam
+terapij) filtrirata po datumskem delu časovne znamke (`substr(...,1,10)`), ne
+po celotni vrednosti. Ker je šlo za spremembo podatkovnega modela na
+razvojni bazi brez pravih uporabniških podatkov, je bila baza ponovno
+zgrajena, namesto pisanja enkratnega migracijskega skripta.
+
+**Utemeljitev:** Izhaja iz mentorjeve pripombe o vnosu jemanja terapije.
+Mentorjev predlog (število odmerkov na dan) bi spremenil pomen podatka iz
+dnevnika posameznih dogodkov jemanja v dnevni seštevek — izgubila bi se
+granularnost (točen čas vsakega odmerka) in zanesljivost shranjevanja (dogodek
+`blur` je na mobilnih napravah manj zanesljiv kot potrditev s klikom, ki takoj
+vrne povratno informacijo o uspehu). Beleženje ure namesto tega ohrani obstoječ
+enostaven vzorec (en klik, en zapis), hkrati pa doda natančnejši podatek, ki je
+pri terapijah pogosto pomemben (npr. odmerek pred obrokom, na določen
+interval) — povezano z razširjeno F4.
+
+**Izbira polja — `casovna_znacka` proti ločenima `datum` in `cas`:** Izbran
+je en sam stolpec `casovna_znacka`, ne dva ločena. SQLite shrani TEXT kot
+niz ne glede na "tip" stolpca, zato ločena stolpca ne bi prinesla nobene
+prednosti pri preverjanju veljavnosti. En sam stolpec z obliko, ki se
+leksikografsko razvršča enako kot kronološko (`YYYY-MM-DD HH:MM`), poenostavi
+`ORDER BY` (eno polje namesto dveh) in shranjevanje/branje (en `datetime`
+objekt na strežniku, brez ročnega sestavljanja/razstavljanja dveh nizov ob
+vsaki poizvedbi). Cena je nekoliko manj berljiva poizvedba pri filtriranju
+samo po datumskem delu (`substr`), kar je sprejemljivo, ker se to zgodi na
+dveh mestih v kodi, dokumentiranih s komentarjem.
+
+**Zavrnjene možnosti:**
+- Obstoječe beleženje samo datuma (`datum`, brez ure) — zavrnjeno, ker ne
+  zadosti mentorjevi zahtevi po natančnejšem podatku o času jemanja.
+- Mentorjev predlog vnosnega polja s številom odmerkov na dan, shranjeno ob
+  `blur` — zavrnjen, ker bi spremenil pomen podatka (dogodek → dnevni
+  seštevek) in zmanjšal zanesljivost vnosa na mobilnih napravah.
+- Ločena stolpca `datum` in `cas` namesto enotne `casovna_znacka` — zavrnjena
+  zaradi nepotrebne dodatne kompleksnosti pri razvrščanju in sestavljanju
+  vrednosti, brez jasne koristi v SQLite.
+
+**Za katero poglavje:** 4.3.2 (podatkovni model), 4.4 (vmesnik), 5 (razprava
+— utemeljitev odstopanja od mentorjevega prvotnega predloga).

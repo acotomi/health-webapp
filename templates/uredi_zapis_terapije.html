@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block naslov %}Uredi zapis jemanja{% endblock %}
+
+{% block vsebina %}
+<div class="stran-ozka">
+<h2>Uredi zapis jemanja</h2>
+
+<form method="post" class="obrazec">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+
+    <label for="casovna_znacka">Datum in ura</label>
+    <input type="datetime-local" id="casovna_znacka" name="casovna_znacka" required value="{{ vrednost_polja }}">
+
+    <button type="submit">Shrani</button>
+</form>
+
+<p><a href="{{ url_for('zgodovina_terapije', terapija_id=terapija_id) }}">Nazaj na zgodovino jemanja</a></p>
+</div>
+{% endblock %}

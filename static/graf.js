@@ -32,8 +32,12 @@ function narisiGrafSimptomov(podatki) {
         return;
     }
 
-    // Namenoma brez rdeče/rožnate - ozadje že uporablja rdečo za območje "huda".
-    const barvePoNizih = ["#2563eb", "#7c3aed", "#d97706", "#15803d", "#78350f"];
+    // Namenoma brez rdeče/rožnate/vijolične - ozadje uporablja rdečo za "huda",
+    // modra in vijolična pa sta si (tudi pri barvni slepoti) preveč podobni.
+    const barvePoNizih = ["#1e3a5f", "#22c55e", "#d97706", "#78350f", "#4b5563"];
+    // Oblika pike je dodatna (ne edina) ločnica med nizi - pomaga pri barvni
+    // slepoti, ko se dve barvi zlijeta. Vgrajeni stili Chart.js, brez SVG-jev.
+    const oblikePoNizih = ["circle", "rect", "triangle", "rectRot", "crossRot"];
 
     new Chart(platno, {
         type: "line",
@@ -45,11 +49,17 @@ function narisiGrafSimptomov(podatki) {
                 spanGaps: true,
                 borderColor: barvePoNizih[i % barvePoNizih.length],
                 backgroundColor: barvePoNizih[i % barvePoNizih.length],
+                pointStyle: oblikePoNizih[i % oblikePoNizih.length],
+                pointRadius: 4,
+                pointHoverRadius: 6,
                 tension: 0.2,
             })),
         },
         options: {
             scales: {
+                x: {
+                    ticks: { autoSkip: false },
+                },
                 y: {
                     min: 0,
                     max: 10,

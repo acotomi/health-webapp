@@ -50,8 +50,10 @@ def dodaj_terapijo(baza, uporabnik_id, naziv, odmerek, pogostost):
 
 
 def dodaj_zapis_terapije(baza, terapija_id, datum):
+    ura = f"{random.randint(7, 21):02d}:{random.choice([0, 15, 30, 45]):02d}"
     baza.execute(
-        "INSERT INTO zapis_terapije (terapija_id, datum) VALUES (?, ?)", (terapija_id, datum)
+        "INSERT INTO zapis_terapije (terapija_id, casovna_znacka) VALUES (?, ?)",
+        (terapija_id, f"{datum} {ura}"),
     )
 
 
@@ -61,7 +63,7 @@ def zadnjih_n_dni(stevilo_dni):
 
 
 def ustvari_sladkorno_bolezen(baza):
-    uporabnik_id = ustvari_uporabnika(baza, "demo1")
+    uporabnik_id = ustvari_uporabnika(baza, "Demo1")
     utrujenost_id = dodaj_simptom(baza, uporabnik_id, "utrujenost")
     zeja_id = dodaj_simptom(baza, uporabnik_id, "žeja")
     omotica_id = dodaj_simptom(baza, uporabnik_id, "omotica")
@@ -86,7 +88,7 @@ def ustvari_sladkorno_bolezen(baza):
 
 
 def ustvari_migreno(baza):
-    uporabnik_id = ustvari_uporabnika(baza, "demo2")
+    uporabnik_id = ustvari_uporabnika(baza, "Demo2")
     glavobol_id = dodaj_simptom(baza, uporabnik_id, "glavobol")
     slabost_id = dodaj_simptom(baza, uporabnik_id, "slabost")
     svetloba_id = dodaj_simptom(baza, uporabnik_id, "preobčutljivost na svetlobo")
@@ -112,7 +114,7 @@ def ustvari_migreno(baza):
 
 
 def ustvari_revmatoidni_artritis(baza):
-    uporabnik_id = ustvari_uporabnika(baza, "demo3")
+    uporabnik_id = ustvari_uporabnika(baza, "Demo3")
     bolecine_id = dodaj_simptom(baza, uporabnik_id, "bolečine v sklepih")
     okorelost_id = dodaj_simptom(baza, uporabnik_id, "jutranja okorelost")
     utrujenost_id = dodaj_simptom(baza, uporabnik_id, "utrujenost")
@@ -144,5 +146,5 @@ with app.app_context():
 
     baza.commit()
 
-print("Demonstracijski uporabniki ustvarjeni: demo1, demo2, demo3")
+print("Demonstracijski uporabniki ustvarjeni: Demo1, Demo2, Demo3")
 print(f"Geslo za vse: {GESLO}")

@@ -10,11 +10,11 @@ ugotovljeni pomanjkljivosti obstoječih rešitev.
 | F1 | Uporabnik ustvari račun in se prijavi | ločen dostop do lastnih podatkov |
 | F2 | Uporabnik zabeleži simptom (datum, vrsta, jakost 0–10, neobvezna opomba) | obremenjujoč vnos podatkov |
 | F3 | Uporabnik vnese in ureja terapije (naziv, odmerek, pogostost) | ločenost simptomov od terapij |
-| F4 | Uporabnik zabeleži, da je terapijo vzel | redka funkcija spremljanja terapije |
+| F4 | Uporabnik zabeleži, da je terapijo vzel, z datumom in uro; zapis lahko naknadno uredi ali izbriše | redka funkcija spremljanja terapije; čas jemanja je pri terapijah pogosto pomemben (npr. pred obroki, na določen interval) |
 | F5 | Uporabnik pregleda zgodovino zapisov, omejeno na izbrano obdobje | raznolike potrebe uporabnikov |
 | F6 | Aplikacija prikaže gibanje jakosti simptomov v grafični obliki z označenimi območji | redek prikaz podatkov pri spletnih aplikacijah |
 | F7 | Uporabnik prikaže povzetek za izbrano obdobje, primeren za prikaz zdravniku, tiskanje ali shranjevanje v PDF | potreba po komunikaciji z zdravstvenim osebjem |
-| F8 | Uporabnik ureja in briše lastne zapise | nadzor nad svojimi podatki |
+| F8 | Uporabnik ureja in briše lastne zapise ter vrste simptomov (popravek naziva, npr. tipkarske napake) | nadzor nad svojimi podatki |
 
 ## 2 Nefunkcionalne zahteve
 
@@ -71,7 +71,7 @@ onemogočilo zanesljiv prikaz istega simptoma skozi čas (F6).
 |---|---|---|
 | id | INTEGER | primarni ključ |
 | terapija_id | INTEGER | tuji ključ → terapija |
-| datum | TEXT | kdaj je bila vzeta |
+| casovna_znacka | TEXT | datum in ura, ko je bila vzeta (`YYYY-MM-DD HH:MM`) |
 
 **Razmerja:** uporabnik 1:N simptom · simptom 1:N zapis_simptoma ·
 uporabnik 1:N terapija · terapija 1:N zapis_terapije
@@ -83,8 +83,9 @@ uporabnik 1:N terapija · terapija 1:N zapis_terapije
 | Prijava / registracija | obrazec | F1 |
 | Nadzorna plošča | graf zadnjih 30 dni, gumb za nov zapis, današnje terapije | F4, F6 |
 | Nov zapis simptoma | izbira simptoma, drsnik jakosti, opomba | F2, N3 |
-| Simptomi | seznam vrst simptomov, dodajanje | F2 |
-| Terapije | seznam, dodajanje, urejanje, označi kot vzeto | F3, F4 |
+| Simptomi | seznam vrst simptomov, dodajanje, urejanje naziva, brisanje | F2, F8 |
+| Terapije | seznam, dodajanje, urejanje, ukinjanje/izbris, označi kot vzeto | F3, F4 |
+| Zgodovina jemanja terapije | seznam datumov in ur jemanja za izbrano terapijo, urejanje ure, brisanje posameznega zapisa | F4, F8 |
 | Zgodovina | tabela zapisov z izbiro obdobja, urejanje in brisanje | F5, F8 |
 | Povzetek | graf in tabela za izbrano obdobje, oblikovano za tisk | F7 |
 

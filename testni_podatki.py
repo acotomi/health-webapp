@@ -6,7 +6,7 @@ namerno, da po nesreči ne podvojiš podatkov. Za ponovno polnjenje najprej
 izbriši instance/zdravje.db in znova poženi pripravi_bazo.py.
 """
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from werkzeug.security import generate_password_hash
 
@@ -56,10 +56,10 @@ with app.app_context():
     )
 
     for i in range(5):
-        datum = (date.today() - timedelta(days=i)).isoformat()
+        casovna_znacka = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d %H:%M")
         db.execute(
-            "INSERT INTO zapis_terapije (terapija_id, datum) VALUES (?, ?)",
-            (terapija_id, datum),
+            "INSERT INTO zapis_terapije (terapija_id, casovna_znacka) VALUES (?, ?)",
+            (terapija_id, casovna_znacka),
         )
 
     db.commit()

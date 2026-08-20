@@ -1,0 +1,5 @@
+{% macro prikazi_obvestila() %}
+{% for kategorija, sporocilo in get_flashed_messages(with_categories=true) %}
+    <p class="sporocilo sporocilo-{{ kategorija }}">{{ sporocilo }}</p>
+{% endfor %}
+{% endmacro %}

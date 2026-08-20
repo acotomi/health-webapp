@@ -17,8 +17,17 @@
     </select>
 
     <label for="jakost">2. Jakost (0 = brez, 10 = najhujša): <output id="jakost-vrednost">5</output></label>
-    <input type="range" id="jakost" name="jakost" min="0" max="10" value="5"
+    <input type="range" id="jakost" name="jakost" min="0" max="10" value="5" list="jakost-oznake"
            oninput="document.getElementById('jakost-vrednost').textContent = this.value">
+    <div class="drsnik-oznake">
+        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+    </div>
+    <datalist id="jakost-oznake">
+        <option value="0"></option><option value="1"></option><option value="2"></option>
+        <option value="3"></option><option value="4"></option><option value="5"></option>
+        <option value="6"></option><option value="7"></option><option value="8"></option>
+        <option value="9"></option><option value="10"></option>
+    </datalist>
 
     <label for="opomba">3. Opomba (neobvezno)</label>
     <textarea id="opomba" name="opomba" rows="3"></textarea>

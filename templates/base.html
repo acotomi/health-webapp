@@ -1,3 +1,4 @@
+{%- from "_obvestila.html" import prikazi_obvestila -%}
 <!doctype html>
 <html lang="sl">
 <head>
@@ -13,13 +14,24 @@
             <nav aria-label="Glavna navigacija">
                 {% if g.uporabnik %}
                     <div class="nav-povezave">
-                        <a href="{{ url_for('simptomi') }}">Simptomi</a>
-                        <a href="{{ url_for('terapije') }}">Terapije</a>
-                        <a href="{{ url_for('zgodovina') }}">Zgodovina</a>
-                        <a href="{{ url_for('povzetek') }}">Povzetek</a>
+                        <a href="{{ url_for('simptomi') }}"
+                           class="nav-povezava{% if request.endpoint in ('simptomi', 'uredi_simptom') %} aktivna{% endif %}"
+                           {% if request.endpoint in ('simptomi', 'uredi_simptom') %}aria-current="page"{% endif %}>Simptomi</a>
+                        <a href="{{ url_for('terapije') }}"
+                           class="nav-povezava{% if request.endpoint in ('terapije', 'uredi_terapijo', 'zgodovina_terapije', 'uredi_zapis_terapije') %} aktivna{% endif %}"
+                           {% if request.endpoint in ('terapije', 'uredi_terapijo', 'zgodovina_terapije', 'uredi_zapis_terapije') %}aria-current="page"{% endif %}>Terapije</a>
+                        <a href="{{ url_for('zgodovina') }}"
+                           class="nav-povezava{% if request.endpoint in ('zgodovina', 'uredi_zapis_simptoma') %} aktivna{% endif %}"
+                           {% if request.endpoint in ('zgodovina', 'uredi_zapis_simptoma') %}aria-current="page"{% endif %}>Zgodovina</a>
+                        <a href="{{ url_for('povzetek') }}"
+                           class="nav-povezava{% if request.endpoint == 'povzetek' %} aktivna{% endif %}"
+                           {% if request.endpoint == 'povzetek' %}aria-current="page"{% endif %}>Povzetek</a>
                     </div>
                     <div class="nav-uporabnik">
-                        <span class="nav-ime">{{ g.uporabnik.uporabnisko_ime }}</span>
+                        <span class="nav-uporabnik-podatki">
+                            <span class="nav-oznaka">Prijavljeni:</span>
+                            <span class="nav-ime">{{ g.uporabnik.uporabnisko_ime }}</span>
+                        </span>
                         <form method="post" action="{{ url_for('odjava') }}">
                             <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
                             <button type="submit">Odjava</button>
@@ -27,8 +39,12 @@
                     </div>
                 {% else %}
                     <div class="nav-povezave">
-                        <a href="{{ url_for('prijava') }}">Prijava</a>
-                        <a href="{{ url_for('registracija') }}">Registracija</a>
+                        <a href="{{ url_for('prijava') }}"
+                           class="nav-povezava{% if request.endpoint == 'prijava' %} aktivna{% endif %}"
+                           {% if request.endpoint == 'prijava' %}aria-current="page"{% endif %}>Prijava</a>
+                        <a href="{{ url_for('registracija') }}"
+                           class="nav-povezava{% if request.endpoint == 'registracija' %} aktivna{% endif %}"
+                           {% if request.endpoint == 'registracija' %}aria-current="page"{% endif %}>Registracija</a>
                     </div>
                 {% endif %}
             </nav>
@@ -36,9 +52,7 @@
     </header>
 
     <main class="container">
-        {% for kategorija, sporocilo in get_flashed_messages(with_categories=true) %}
-            <p class="sporocilo sporocilo-{{ kategorija }}">{{ sporocilo }}</p>
-        {% endfor %}
+        {% block obvestila %}{{ prikazi_obvestila() }}{% endblock %}
 
         {% block vsebina %}{% endblock %}
     </main>

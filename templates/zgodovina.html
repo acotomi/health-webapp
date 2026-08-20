@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_ikone.html" import svincnik, kos %}
 
 {% block naslov %}Zgodovina{% endblock %}
 
@@ -39,11 +40,17 @@
             <td data-label="Opomba">{{ zapis.opomba or "–" }}</td>
             <td class="celica-dejanja">
                 <div class="dejanja">
-                    <a class="gumb gumb-majhen gumb-sekundaren" href="{{ url_for('uredi_zapis_simptoma', zapis_id=zapis.id) }}">Uredi</a>
+                    <a class="gumb gumb-ikona gumb-sekundaren" href="{{ url_for('uredi_zapis_simptoma', zapis_id=zapis.id) }}" aria-label="Uredi">
+                        {{ svincnik() }}
+                        <span class="namig" aria-hidden="true">Uredi</span>
+                    </a>
                     <form method="post" action="{{ url_for('izbrisi_zapis_simptoma', zapis_id=zapis.id) }}"
                           onsubmit="return confirm('Izbrišete ta zapis?')">
                         <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit" class="gumb-majhen gumb-nevarno">Izbriši</button>
+                        <button type="submit" class="gumb-ikona gumb-nevarno" aria-label="Izbriši">
+                            {{ kos() }}
+                            <span class="namig" aria-hidden="true">Izbriši</span>
+                        </button>
                     </form>
                 </div>
             </td>

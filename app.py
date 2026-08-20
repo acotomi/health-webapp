@@ -27,6 +27,32 @@ def oblikuj_datum_sl(datum_iso):
 app.jinja_env.filters["datum_sl"] = oblikuj_datum_sl
 
 
+def oblikuj_oznake_grafa(seznam_datumov):
+    """Oznake za os x grafa: letnica se izpiše samo na prvi oznaki in ob
+    morebitni spremembi leta, sicer samo dan in mesec - da os pri daljšem
+    obdobju ni prenasičena s stalno ponavljajočo se isto letnico."""
+    oznake = []
+    zadnje_leto = None
+    for datum_iso in seznam_datumov:
+        d = datetime.strptime(datum_iso, "%Y-%m-%d").date()
+        if d.year != zadnje_leto:
+            oznake.append(f"{d.day}. {d.month}. {d.year}")
+            zadnje_leto = d.year
+        else:
+            oznake.append(f"{d.day}. {d.month}.")
+    return oznake
+
+
+def oblikuj_casovno_znacko_sl(casovna_znacka):
+    """Datum in ura iz oblike 'YYYY-MM-DD HH:MM' v slovensko obliko,
+    npr. '19. 8. 2026 ob 14:30'."""
+    t = datetime.strptime(casovna_znacka, "%Y-%m-%d %H:%M")
+    return f"{t.day}. {t.month}. {t.year} ob {t.strftime('%H:%M')}"
+
+
+app.jinja_env.filters["casovna_znacka_sl"] = oblikuj_casovno_znacko_sl
+
+
 def pridobi_csrf_zeton():
     """Vrne CSRF žeton trenutne seje; ob prvem klicu ga ustvari."""
     if "csrf_zeton" not in session:
@@ -113,13 +139,13 @@ def domov():
         for naziv, vrednosti_po_datumu in jakosti_po_simptomu.items()
     ]
 
-    podatki_grafa = {"datumi": [oblikuj_datum_sl(d) for d in seznam_datumov], "nizi": nizi}
+    podatki_grafa = {"datumi": oblikuj_oznake_grafa(seznam_datumov), "nizi": nizi}
 
     danasnje_terapije = baza.execute(
         """
         SELECT t.id, t.naziv,
                (SELECT COUNT(*) FROM zapis_terapije z
-                WHERE z.terapija_id = t.id AND z.datum = ?) AS vzeto_danes
+                WHERE z.terapija_id = t.id AND substr(z.casovna_znacka, 1, 10) = ?) AS vzeto_danes
         FROM terapija t
         WHERE t.uporabnik_id = ? AND t.aktivna = 1
         ORDER BY t.naziv
@@ -228,6 +254,41 @@ def simptomi():
     return render_template("simptomi.html", simptomi=seznam_simptomov)
 
 
+@app.route("/simptomi/<int:simptom_id>/uredi", methods=("GET", "POST"))
+@prijava_zahtevana
+def uredi_simptom(simptom_id):
+    baza = db.get_db()
+    simptom = baza.execute(
+        "SELECT id, naziv FROM simptom WHERE id = ? AND uporabnik_id = ?",
+        (simptom_id, g.uporabnik["id"]),
+    ).fetchone()
+
+    if simptom is None:
+        flash("Simptom ne obstaja.", "napaka")
+        return redirect(url_for("simptomi"))
+
+    if request.method == "POST":
+        naziv = request.form["naziv"].strip()
+
+        if not naziv:
+            flash("Naziv simptoma je obvezen.", "napaka")
+        elif baza.execute(
+            "SELECT id FROM simptom WHERE uporabnik_id = ? AND naziv = ? AND id != ?",
+            (g.uporabnik["id"], naziv, simptom_id),
+        ).fetchone():
+            flash(f"Simptom '{naziv}' že obstaja.", "napaka")
+        else:
+            baza.execute(
+                "UPDATE simptom SET naziv = ? WHERE id = ? AND uporabnik_id = ?",
+                (naziv, simptom_id, g.uporabnik["id"]),
+            )
+            baza.commit()
+            flash("Naziv simptoma je posodobljen.", "uspeh")
+            return redirect(url_for("simptomi"))
+
+    return render_template("uredi_simptom.html", simptom=simptom)
+
+
 @app.route("/simptomi/<int:simptom_id>/izbrisi", methods=("POST",))
 @prijava_zahtevana
 def izbrisi_simptom(simptom_id):
@@ -328,7 +389,7 @@ def terapije():
         """
         SELECT t.id, t.naziv, t.odmerek, t.pogostost, t.aktivna,
                (SELECT COUNT(*) FROM zapis_terapije z
-                WHERE z.terapija_id = t.id AND z.datum = ?) AS vzeto_danes
+                WHERE z.terapija_id = t.id AND substr(z.casovna_znacka, 1, 10) = ?) AS vzeto_danes
         FROM terapija t
         WHERE t.uporabnik_id = ?
         ORDER BY t.aktivna DESC, t.naziv
@@ -441,12 +502,14 @@ def oznaci_vzeto(terapija_id):
         flash("Terapija ne obstaja ali ni aktivna.", "napaka")
     else:
         baza.execute(
-            "INSERT INTO zapis_terapije (terapija_id, datum) VALUES (?, ?)",
-            (terapija_id, date.today().isoformat()),
+            "INSERT INTO zapis_terapije (terapija_id, casovna_znacka) VALUES (?, ?)",
+            (terapija_id, datetime.now().strftime("%Y-%m-%d %H:%M")),
         )
         baza.commit()
         flash("Jemanje terapije je zabeleženo.", "uspeh")
 
+    if request.form.get("naslednja") == "domov":
+        return redirect(url_for("domov") + "#danes-terapije")
     return redirect(url_for("terapije"))
 
 
@@ -464,11 +527,50 @@ def zgodovina_terapije(terapija_id):
         return redirect(url_for("terapije"))
 
     zapisi = baza.execute(
-        "SELECT id, datum FROM zapis_terapije WHERE terapija_id = ? ORDER BY datum DESC, id DESC",
+        "SELECT id, casovna_znacka FROM zapis_terapije WHERE terapija_id = ? ORDER BY casovna_znacka DESC, id DESC",
         (terapija_id,),
     ).fetchall()
 
     return render_template("zgodovina_terapije.html", terapija=terapija, zapisi=zapisi)
+
+
+@app.route("/terapije/<int:terapija_id>/zgodovina/<int:zapis_id>/uredi", methods=("GET", "POST"))
+@prijava_zahtevana
+def uredi_zapis_terapije(terapija_id, zapis_id):
+    baza = db.get_db()
+    zapis = baza.execute(
+        """
+        SELECT z.id, z.casovna_znacka FROM zapis_terapije z
+        JOIN terapija t ON z.terapija_id = t.id
+        WHERE z.id = ? AND z.terapija_id = ? AND t.uporabnik_id = ?
+        """,
+        (zapis_id, terapija_id, g.uporabnik["id"]),
+    ).fetchone()
+
+    if zapis is None:
+        flash("Zapis ne obstaja.", "napaka")
+        return redirect(url_for("zgodovina_terapije", terapija_id=terapija_id))
+
+    if request.method == "POST":
+        vnos = request.form.get("casovna_znacka", "")
+
+        try:
+            razclenjeno = datetime.strptime(vnos, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Vnesi veljaven datum in uro.", "napaka")
+        else:
+            baza.execute(
+                "UPDATE zapis_terapije SET casovna_znacka = ? WHERE id = ? AND terapija_id = ?",
+                (razclenjeno.strftime("%Y-%m-%d %H:%M"), zapis_id, terapija_id),
+            )
+            baza.commit()
+            flash("Zapis o jemanju je posodobljen.", "uspeh")
+            return redirect(url_for("zgodovina_terapije", terapija_id=terapija_id))
+
+    vrednost_polja = zapis["casovna_znacka"].replace(" ", "T")
+    return render_template(
+        "uredi_zapis_terapije.html", terapija_id=terapija_id, vrednost_polja=vrednost_polja
+    )
 
 
 @app.route("/terapije/<int:terapija_id>/zgodovina/<int:zapis_id>/izbrisi", methods=("POST",))
@@ -641,7 +743,7 @@ def povzetek():
         for naziv, vrednosti in jakosti_po_simptomu.items()
     ]
 
-    podatki_grafa = {"datumi": [oblikuj_datum_sl(d) for d in seznam_datumov], "nizi": nizi}
+    podatki_grafa = {"datumi": oblikuj_oznake_grafa(seznam_datumov), "nizi": nizi}
 
     aktivne_terapije = baza.execute(
         "SELECT naziv, odmerek, pogostost FROM terapija WHERE uporabnik_id = ? AND aktivna = 1 ORDER BY naziv",

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_ikone.html" import kapsula, svincnik, kos, obnovi %}
 
 {% block naslov %}Terapije{% endblock %}
 
@@ -31,21 +32,33 @@
                     {% if terapija.aktivna %}
                     <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
                         <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit" class="gumb-majhen">Vzeto</button>
+                        <input type="hidden" name="naslednja" value="terapije">
+                        <button type="submit" class="gumb-ikona" aria-label="Vzeto">
+                            {{ kapsula() }}
+                            <span class="namig" aria-hidden="true">Vzeto</span>
+                        </button>
                     </form>
                     {% endif %}
-                    <a class="gumb gumb-majhen gumb-sekundaren" href="{{ url_for('uredi_terapijo', terapija_id=terapija.id) }}">Uredi</a>
-                    <a class="gumb gumb-majhen gumb-sekundaren" href="{{ url_for('zgodovina_terapije', terapija_id=terapija.id) }}">Zgodovina</a>
+                    <a class="gumb gumb-ikona gumb-sekundaren" href="{{ url_for('uredi_terapijo', terapija_id=terapija.id) }}" aria-label="Uredi">
+                        {{ svincnik() }}
+                        <span class="namig" aria-hidden="true">Uredi</span>
+                    </a>
+                    <a class="gumb gumb-sekundaren" href="{{ url_for('zgodovina_terapije', terapija_id=terapija.id) }}">Zgodovina</a>
                     <form method="post" action="{{ url_for('preklopi_terapijo', terapija_id=terapija.id) }}">
                         <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit" class="gumb-majhen {{ 'gumb-nevarno' if terapija.aktivna else 'gumb-sekundaren' }}">
-                            {{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}
+                        <button type="submit" class="gumb-ikona {{ 'gumb-nevarno' if terapija.aktivna else 'gumb-sekundaren' }}"
+                                aria-label="{{ 'Ukini' if terapija.aktivna else 'Ponovno aktiviraj' }}">
+                            {% if terapija.aktivna %}{{ kos() }}{% else %}{{ obnovi() }}{% endif %}
+                            <span class="namig" aria-hidden="true">{{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}</span>
                         </button>
                     </form>
                     <form method="post" action="{{ url_for('izbrisi_terapijo', terapija_id=terapija.id) }}"
                           onsubmit="return confirm('Izbrišete to terapijo?')">
                         <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit" class="gumb-majhen gumb-nevarno">Izbriši</button>
+                        <button type="submit" class="gumb-ikona gumb-nevarno" aria-label="Izbriši">
+                            {{ kos() }}
+                            <span class="namig" aria-hidden="true">Izbriši</span>
+                        </button>
                     </form>
                 </div>
             </td>

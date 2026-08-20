@@ -33,7 +33,10 @@ zdravstvenem stanju, priporočila odmerkov, napovedovanje poslabšanj).
 - Jinja2 predloge, običajen HTML/CSS
 - Chart.js za grafični prikaz - shranjen lokalno v static/, brez CDN
 - Brez zunanjih storitev, brez prijave prek tretjih ponudnikov
-
+- Vse potrebne datoteke shranjene lokalno v projektu (razlog: zahteva do
+  tujega strežnika bi mu razkrila IP uporabnika in podatek o tem, katero
+  stran obiskuje — člen 25 GDPR)
+  
 Novih odvisnosti ne dodajaj brez izrecnega dogovora. Vsaka knjižnica je nekaj,
 kar mora avtor znati pojasniti.
 
