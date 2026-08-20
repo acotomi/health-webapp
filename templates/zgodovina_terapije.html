@@ -3,29 +3,34 @@
 {% block naslov %}Zgodovina jemanja{% endblock %}
 
 {% block vsebina %}
+<div class="stran-ozka">
 <h2>Zgodovina jemanja: {{ terapija.naziv }}</h2>
 
 {% if zapisi %}
-<table>
+<div class="tabela-okvir">
+<table class="odzivna-tabela">
     <thead>
         <tr><th>Datum</th><th></th></tr>
     </thead>
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td>{{ zapis.datum | datum_sl }}</td>
-            <td>
-                <form method="post"
-                      action="{{ url_for('izbrisi_zapis_terapije', terapija_id=terapija.id, zapis_id=zapis.id) }}"
-                      onsubmit="return confirm('Izbrišete ta zapis o jemanju?')">
-                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                    <button type="submit" class="gumb-nevarno">Izbriši</button>
-                </form>
+            <td data-label="Datum" class="celica-datum">{{ zapis.datum | datum_sl }}</td>
+            <td class="celica-dejanja">
+                <div class="dejanja">
+                    <form method="post"
+                          action="{{ url_for('izbrisi_zapis_terapije', terapija_id=terapija.id, zapis_id=zapis.id) }}"
+                          onsubmit="return confirm('Izbrišete ta zapis o jemanju?')">
+                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                        <button type="submit" class="gumb-majhen gumb-nevarno">Izbriši</button>
+                    </form>
+                </div>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 <p class="pojasnilo">
     Zapisi hranijo samo datum, ne ure. Če je bila terapija vzeta večkrat isti
     dan, se ta datum pojavi večkrat.
@@ -35,4 +40,5 @@
 {% endif %}
 
 <p><a href="{{ url_for('terapije') }}">Nazaj na seznam terapij</a></p>
+</div>
 {% endblock %}

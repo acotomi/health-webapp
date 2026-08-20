@@ -5,18 +5,22 @@
 {% block vsebina %}
 <h2>Zgodovina zapisov</h2>
 
-<form method="get">
-    <label for="od">Od</label>
-    <input type="date" id="od" name="od" value="{{ zacetek }}">
-
-    <label for="do">Do</label>
-    <input type="date" id="do" name="do" value="{{ konec }}">
+<form method="get" class="filter-obrazec">
+    <div class="polje">
+        <label for="od">Od</label>
+        <input type="date" id="od" name="od" value="{{ zacetek }}">
+    </div>
+    <div class="polje">
+        <label for="do">Do</label>
+        <input type="date" id="do" name="do" value="{{ konec }}">
+    </div>
 
     <button type="submit">Prikaži</button>
 </form>
 
 {% if zapisi %}
-<table>
+<div class="tabela-okvir sklop">
+<table class="odzivna-tabela">
     <thead>
         <tr>
             <th>Datum</th>
@@ -29,22 +33,25 @@
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td>{{ zapis.datum | datum_sl }}</td>
-            <td>{{ zapis.simptom_naziv }}</td>
-            <td>{{ zapis.jakost }}</td>
-            <td>{{ zapis.opomba or "–" }}</td>
-            <td>
-                <a href="{{ url_for('uredi_zapis_simptoma', zapis_id=zapis.id) }}">Uredi</a>
-                <form method="post" action="{{ url_for('izbrisi_zapis_simptoma', zapis_id=zapis.id) }}"
-                      onsubmit="return confirm('Izbrišete ta zapis?')">
-                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                    <button type="submit" class="gumb-nevarno">Izbriši</button>
-                </form>
+            <td data-label="Datum" class="celica-datum">{{ zapis.datum | datum_sl }}</td>
+            <td data-label="Simptom">{{ zapis.simptom_naziv }}</td>
+            <td data-label="Jakost" class="celica-stevilo">{{ zapis.jakost }}</td>
+            <td data-label="Opomba">{{ zapis.opomba or "–" }}</td>
+            <td class="celica-dejanja">
+                <div class="dejanja">
+                    <a class="gumb gumb-majhen gumb-sekundaren" href="{{ url_for('uredi_zapis_simptoma', zapis_id=zapis.id) }}">Uredi</a>
+                    <form method="post" action="{{ url_for('izbrisi_zapis_simptoma', zapis_id=zapis.id) }}"
+                          onsubmit="return confirm('Izbrišete ta zapis?')">
+                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                        <button type="submit" class="gumb-majhen gumb-nevarno">Izbriši</button>
+                    </form>
+                </div>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p>V izbranem obdobju ni zapisov.</p>
 {% endif %}

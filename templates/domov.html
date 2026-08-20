@@ -3,13 +3,19 @@
 {% block naslov %}Nadzorna plošča{% endblock %}
 
 {% block vsebina %}
+<div class="stran-srednja">
 <h2>Pozdravljeni, {{ g.uporabnik.uporabnisko_ime }}</h2>
 
-<p><a class="gumb" href="{{ url_for('nov_zapis_simptoma') }}">Nov zapis simptoma</a></p>
+<div class="vrstica-gumbov">
+    <a class="gumb" href="{{ url_for('nov_zapis_simptoma') }}">Nov zapis simptoma</a>
+</div>
 
+<section class="sklop">
 <h3>Gibanje jakosti simptomov (zadnjih 30 dni)</h3>
 {% if podatki_grafa.nizi %}
-<canvas id="graf-simptomov" height="220"></canvas>
+<div class="graf-kartica">
+    <canvas id="graf-simptomov" height="220"></canvas>
+</div>
 <p class="pojasnilo">
     Barvna območja prikazujejo grobo jakost: zeleno = blaga (0–3), rumeno =
     zmerna (4–6), rdeče = huda (7–10).
@@ -17,31 +23,38 @@
 {% else %}
 <p>Ni še podatkov za prikaz. Dodajte svoj prvi zapis simptoma.</p>
 {% endif %}
+</section>
 
+<section class="sklop">
 <h3>Današnje terapije</h3>
 {% if terapije %}
-<table>
+<div class="tabela-okvir">
+<table class="odzivna-tabela">
     <thead>
         <tr><th>Naziv</th><th>Danes vzeto</th><th></th></tr>
     </thead>
     <tbody>
         {% for terapija in terapije %}
         <tr>
-            <td>{{ terapija.naziv }}</td>
-            <td>{{ terapija.vzeto_danes }}</td>
-            <td>
-                <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
-                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                    <button type="submit">Vzeto</button>
-                </form>
+            <td data-label="Naziv">{{ terapija.naziv }}</td>
+            <td data-label="Danes vzeto" class="celica-stevilo">{{ terapija.vzeto_danes }}</td>
+            <td class="celica-dejanja">
+                <div class="dejanja">
+                    <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
+                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                        <button type="submit" class="gumb-majhen">Vzeto</button>
+                    </form>
+                </div>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p>Nimate aktivnih terapij.</p>
 {% endif %}
+</section>
 
 <script>
     const podatkiGrafa = {{ podatki_grafa | tojson }};
@@ -51,4 +64,5 @@
 <script>
     narisiGrafSimptomov(podatkiGrafa);
 </script>
+</div>
 {% endblock %}

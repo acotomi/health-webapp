@@ -6,7 +6,8 @@
 <h2>Terapije</h2>
 
 {% if terapije %}
-<table>
+<div class="tabela-okvir">
+<table class="odzivna-tabela tabela-siroka">
     <thead>
         <tr>
             <th>Naziv</th>
@@ -20,42 +21,46 @@
     <tbody>
         {% for terapija in terapije %}
         <tr>
-            <td>{{ terapija.naziv }}</td>
-            <td>{{ terapija.odmerek or "–" }}</td>
-            <td>{{ terapija.pogostost or "–" }}</td>
-            <td>{{ "aktivna" if terapija.aktivna else "ukinjena" }}</td>
-            <td>{{ terapija.vzeto_danes }}</td>
-            <td>
-                {% if terapija.aktivna %}
-                <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
-                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                    <button type="submit">Vzeto</button>
-                </form>
-                {% endif %}
-                <a href="{{ url_for('uredi_terapijo', terapija_id=terapija.id) }}">Uredi</a>
-                <a href="{{ url_for('zgodovina_terapije', terapija_id=terapija.id) }}">Zgodovina</a>
-                <form method="post" action="{{ url_for('preklopi_terapijo', terapija_id=terapija.id) }}">
-                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                    <button type="submit" class="{{ 'gumb-nevarno' if terapija.aktivna else '' }}">
-                        {{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}
-                    </button>
-                </form>
-                <form method="post" action="{{ url_for('izbrisi_terapijo', terapija_id=terapija.id) }}"
-                      onsubmit="return confirm('Izbrišete to terapijo?')">
-                    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                    <button type="submit" class="gumb-nevarno">Izbriši</button>
-                </form>
+            <td data-label="Naziv">{{ terapija.naziv }}</td>
+            <td data-label="Odmerek">{{ terapija.odmerek or "–" }}</td>
+            <td data-label="Pogostost">{{ terapija.pogostost or "–" }}</td>
+            <td data-label="Stanje">{{ "aktivna" if terapija.aktivna else "ukinjena" }}</td>
+            <td data-label="Danes vzeto" class="celica-stevilo">{{ terapija.vzeto_danes }}</td>
+            <td class="celica-dejanja">
+                <div class="dejanja">
+                    {% if terapija.aktivna %}
+                    <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">
+                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                        <button type="submit" class="gumb-majhen">Vzeto</button>
+                    </form>
+                    {% endif %}
+                    <a class="gumb gumb-majhen gumb-sekundaren" href="{{ url_for('uredi_terapijo', terapija_id=terapija.id) }}">Uredi</a>
+                    <a class="gumb gumb-majhen gumb-sekundaren" href="{{ url_for('zgodovina_terapije', terapija_id=terapija.id) }}">Zgodovina</a>
+                    <form method="post" action="{{ url_for('preklopi_terapijo', terapija_id=terapija.id) }}">
+                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                        <button type="submit" class="gumb-majhen {{ 'gumb-nevarno' if terapija.aktivna else 'gumb-sekundaren' }}">
+                            {{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}
+                        </button>
+                    </form>
+                    <form method="post" action="{{ url_for('izbrisi_terapijo', terapija_id=terapija.id) }}"
+                          onsubmit="return confirm('Izbrišete to terapijo?')">
+                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                        <button type="submit" class="gumb-majhen gumb-nevarno">Izbriši</button>
+                    </form>
+                </div>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p>Še nimate dodane nobene terapije.</p>
 {% endif %}
 
+<section class="sklop">
 <h2>Dodaj terapijo</h2>
-<form method="post">
+<form method="post" class="obrazec">
     <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
 
     <label for="naziv">Naziv</label>
@@ -69,4 +74,5 @@
 
     <button type="submit">Dodaj</button>
 </form>
+</section>
 {% endblock %}

@@ -8,25 +8,31 @@
 </head>
 <body>
     <header>
-        <h1><a href="{{ url_for('domov') }}">Spremljanje simptomov in terapij</a></h1>
-        <nav>
-            {% if g.uporabnik %}
-                <a href="{{ url_for('simptomi') }}">Simptomi</a>
-                <a href="{{ url_for('terapije') }}">Terapije</a>
-                <a href="{{ url_for('zgodovina') }}">Zgodovina</a>
-                <a href="{{ url_for('povzetek') }}">Povzetek</a>
-                <span class="nav-uporabnik">
-                    <span class="nav-ime">{{ g.uporabnik.uporabnisko_ime }}</span>
-                    <form method="post" action="{{ url_for('odjava') }}">
-                        <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit">Odjava</button>
-                    </form>
-                </span>
-            {% else %}
-                <a href="{{ url_for('prijava') }}">Prijava</a>
-                <a href="{{ url_for('registracija') }}">Registracija</a>
-            {% endif %}
-        </nav>
+        <div class="glava-notranjost">
+            <h1><a href="{{ url_for('domov') }}">Spremljanje simptomov in terapij</a></h1>
+            <nav aria-label="Glavna navigacija">
+                {% if g.uporabnik %}
+                    <div class="nav-povezave">
+                        <a href="{{ url_for('simptomi') }}">Simptomi</a>
+                        <a href="{{ url_for('terapije') }}">Terapije</a>
+                        <a href="{{ url_for('zgodovina') }}">Zgodovina</a>
+                        <a href="{{ url_for('povzetek') }}">Povzetek</a>
+                    </div>
+                    <div class="nav-uporabnik">
+                        <span class="nav-ime">{{ g.uporabnik.uporabnisko_ime }}</span>
+                        <form method="post" action="{{ url_for('odjava') }}">
+                            <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+                            <button type="submit">Odjava</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="nav-povezave">
+                        <a href="{{ url_for('prijava') }}">Prijava</a>
+                        <a href="{{ url_for('registracija') }}">Registracija</a>
+                    </div>
+                {% endif %}
+            </nav>
+        </div>
     </header>
 
     <main class="container">

@@ -3,9 +3,10 @@
 {% block naslov %}Nov zapis simptoma{% endblock %}
 
 {% block vsebina %}
+<div class="stran-ozka">
 <h2>Nov zapis simptoma</h2>
 
-<form method="post">
+<form method="post" class="obrazec">
     <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
 
     <label for="simptom_id">1. Simptom</label>
@@ -24,4 +25,5 @@
 
     <button type="submit">Shrani</button>
 </form>
+</div>
 {% endblock %}

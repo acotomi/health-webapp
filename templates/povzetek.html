@@ -3,23 +3,32 @@
 {% block naslov %}Povzetek{% endblock %}
 
 {% block vsebina %}
+<div class="stran-srednja">
 <h2>Povzetek za obdobje {{ zacetek | datum_sl }} – {{ konec | datum_sl }}</h2>
 
-<form method="get" class="ne-tiskaj">
-    <label for="od">Od</label>
-    <input type="date" id="od" name="od" value="{{ zacetek }}">
-
-    <label for="do">Do</label>
-    <input type="date" id="do" name="do" value="{{ konec }}">
+<form method="get" class="filter-obrazec ne-tiskaj">
+    <div class="polje">
+        <label for="od">Od</label>
+        <input type="date" id="od" name="od" value="{{ zacetek }}">
+    </div>
+    <div class="polje">
+        <label for="do">Do</label>
+        <input type="date" id="do" name="do" value="{{ konec }}">
+    </div>
 
     <button type="submit">Prikaži</button>
 </form>
 
-<p class="ne-tiskaj"><button type="button" onclick="window.print()">Natisni / shrani kot PDF</button></p>
+<div class="vrstica-gumbov ne-tiskaj">
+    <button type="button" class="gumb-sekundaren" onclick="window.print()">Natisni / shrani kot PDF</button>
+</div>
 
+<section class="sklop">
 <h3>Gibanje jakosti simptomov</h3>
 {% if podatki_grafa.nizi %}
-<canvas id="graf-simptomov" height="220"></canvas>
+<div class="graf-kartica">
+    <canvas id="graf-simptomov" height="220"></canvas>
+</div>
 <p class="pojasnilo">
     Barvna območja prikazujejo grobo jakost: zeleno = blaga (0–3), rumeno =
     zmerna (4–6), rdeče = huda (7–10).
@@ -27,47 +36,56 @@
 {% else %}
 <p>V izbranem obdobju ni zapisov simptomov.</p>
 {% endif %}
+</section>
 
+<section class="sklop">
 <h3>Zapisi simptomov</h3>
 {% if zapisi %}
-<table>
+<div class="tabela-okvir">
+<table class="odzivna-tabela">
     <thead>
         <tr><th>Datum</th><th>Simptom</th><th>Jakost</th><th>Opomba</th></tr>
     </thead>
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td>{{ zapis.datum | datum_sl }}</td>
-            <td>{{ zapis.simptom_naziv }}</td>
-            <td>{{ zapis.jakost }}</td>
-            <td>{{ zapis.opomba or "–" }}</td>
+            <td data-label="Datum" class="celica-datum">{{ zapis.datum | datum_sl }}</td>
+            <td data-label="Simptom">{{ zapis.simptom_naziv }}</td>
+            <td data-label="Jakost" class="celica-stevilo">{{ zapis.jakost }}</td>
+            <td data-label="Opomba">{{ zapis.opomba or "–" }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p>Ni zapisov v izbranem obdobju.</p>
 {% endif %}
+</section>
 
+<section class="sklop">
 <h3>Trenutne terapije</h3>
 {% if terapije %}
-<table>
+<div class="tabela-okvir">
+<table class="odzivna-tabela">
     <thead>
         <tr><th>Naziv</th><th>Odmerek</th><th>Pogostost</th></tr>
     </thead>
     <tbody>
         {% for terapija in terapije %}
         <tr>
-            <td>{{ terapija.naziv }}</td>
-            <td>{{ terapija.odmerek or "–" }}</td>
-            <td>{{ terapija.pogostost or "–" }}</td>
+            <td data-label="Naziv">{{ terapija.naziv }}</td>
+            <td data-label="Odmerek">{{ terapija.odmerek or "–" }}</td>
+            <td data-label="Pogostost">{{ terapija.pogostost or "–" }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p>Trenutno ni aktivnih terapij.</p>
 {% endif %}
+</section>
 
 <script>
     const podatkiGrafa = {{ podatki_grafa | tojson }};
@@ -77,4 +95,5 @@
 <script>
     narisiGrafSimptomov(podatkiGrafa);
 </script>
+</div>
 {% endblock %}
