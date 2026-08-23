@@ -389,3 +389,28 @@ neuporabna, če je JavaScript izklopljen.
   nujno jeziku brskalnika).
 
 **Za katero poglavje:** 4.4 (vmesnik).
+
+## 2026-08-24 — Povzetek vključuje tudi zgodovino jemanja terapij
+
+**Vprašanje:** Ali sodi prikaz zgodovine jemanja terapij (datum, ura, naziv)
+za izbrano obdobje v zaslon "Povzetek", ali bi to že pomenilo razširitev
+zahteve F7?
+
+**Odločitev:** Na zaslon Povzetek je dodana tabela "Zapisi jemanja terapij"
+za izbrano obdobje — enak vzorec (tabela, tiskalni slog, prilagodljiva
+oblika datuma) kot že obstoječa tabela "Zapisi simptomov".
+
+**Utemeljitev:** F7 se glasi "uporabnik prikaže povzetek podatkov za izbrano
+obdobje" — ne določa, katerih podatkov. Podatek (`zapis_terapije`) že
+obstaja in se že zbira (F4); Povzetek že združuje več vrst podatkov
+(simptomi, trenutne terapije), zato je dodatek dosleden z obstoječim
+namenom zaslona, ne nova zmožnost. Zdravniku omogoča primerjavo poteka
+simptomov z dejanskim jemanjem terapij v istem obdobju (F7 — "potreba po
+komunikaciji z zdravstvenim osebjem").
+
+**Zavrnjene možnosti:** Prekrivanje oznak jemanja neposredno na grafu
+jakosti simptomov — zavrnjeno, ker bi zahtevalo dodaten Chart.js vtičnik in
+bi pri več terapijah/odmerkih na dan graf hitro postal vizualno natrpan (v
+nasprotju z N2). Ločena tabela doseže enak namen brez tega tveganja.
+
+**Za katero poglavje:** 4.3.2 (obseg zahteve F7), 4.4 (vmesnik).
