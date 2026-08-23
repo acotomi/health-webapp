@@ -4,7 +4,11 @@
 
 {% block vsebina %}
 <div class="stran-srednja">
-<h2>Povzetek za obdobje {{ zacetek | datum_sl }} – {{ konec | datum_sl }}</h2>
+<h2>Povzetek za obdobje
+    <span data-datum="{{ zacetek }}">{{ zacetek | datum_sl }}</span>
+    –
+    <span data-datum="{{ konec }}">{{ konec | datum_sl }}</span>
+</h2>
 
 <form method="get" class="filter-obrazec ne-tiskaj">
     <div class="polje">
@@ -49,7 +53,7 @@
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td data-label="Datum" class="celica-datum">{{ zapis.datum | datum_sl }}</td>
+            <td data-label="Datum" class="celica-datum" data-datum="{{ zapis.datum }}">{{ zapis.datum | datum_sl }}</td>
             <td data-label="Simptom">{{ zapis.simptom_naziv }}</td>
             <td data-label="Jakost" class="celica-stevilo">{{ zapis.jakost }}</td>
             <td data-label="Opomba">{{ zapis.opomba or "–" }}</td>
@@ -60,6 +64,29 @@
 </div>
 {% else %}
 <p>Ni zapisov v izbranem obdobju.</p>
+{% endif %}
+</section>
+
+<section class="sklop">
+<h3>Zapisi jemanja terapij</h3>
+{% if zapisi_jemanja %}
+<div class="tabela-okvir">
+<table class="odzivna-tabela">
+    <thead>
+        <tr><th>Datum in ura</th><th>Terapija</th></tr>
+    </thead>
+    <tbody>
+        {% for zapis in zapisi_jemanja %}
+        <tr>
+            <td data-label="Datum in ura" class="celica-datum" data-casovna-znacka="{{ zapis.casovna_znacka }}">{{ zapis.casovna_znacka | casovna_znacka_sl }}</td>
+            <td data-label="Terapija">{{ zapis.terapija_naziv }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p>V izbranem obdobju ni zapisov o jemanju terapij.</p>
 {% endif %}
 </section>
 
@@ -95,5 +122,6 @@
 <script>
     narisiGrafSimptomov(podatkiGrafa);
 </script>
+<script src="{{ url_for('static', filename='datumi.js') }}"></script>
 </div>
 {% endblock %}

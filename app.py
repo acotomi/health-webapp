@@ -27,22 +27,6 @@ def oblikuj_datum_sl(datum_iso):
 app.jinja_env.filters["datum_sl"] = oblikuj_datum_sl
 
 
-def oblikuj_oznake_grafa(seznam_datumov):
-    """Oznake za os x grafa: letnica se izpiše samo na prvi oznaki in ob
-    morebitni spremembi leta, sicer samo dan in mesec - da os pri daljšem
-    obdobju ni prenasičena s stalno ponavljajočo se isto letnico."""
-    oznake = []
-    zadnje_leto = None
-    for datum_iso in seznam_datumov:
-        d = datetime.strptime(datum_iso, "%Y-%m-%d").date()
-        if d.year != zadnje_leto:
-            oznake.append(f"{d.day}. {d.month}. {d.year}")
-            zadnje_leto = d.year
-        else:
-            oznake.append(f"{d.day}. {d.month}.")
-    return oznake
-
-
 def oblikuj_casovno_znacko_sl(casovna_znacka):
     """Datum in ura iz oblike 'YYYY-MM-DD HH:MM' v slovensko obliko,
     npr. '19. 8. 2026 ob 14:30'."""
@@ -61,6 +45,19 @@ def pridobi_csrf_zeton():
 
 
 app.jinja_env.globals["csrf_zeton"] = pridobi_csrf_zeton
+
+PRIMER_VELJAVNEGA_GESLA = "Geslo123!"
+
+
+def geslo_ustreza_zahtevam(geslo):
+    """Vsaj 8 znakov, vsaj ena velika črka in vsaj en poseben znak."""
+    if len(geslo) < 8:
+        return False
+    if not any(znak.isupper() for znak in geslo):
+        return False
+    if not any(not znak.isalnum() for znak in geslo):
+        return False
+    return True
 
 
 @app.before_request
@@ -139,19 +136,29 @@ def domov():
         for naziv, vrednosti_po_datumu in jakosti_po_simptomu.items()
     ]
 
-    podatki_grafa = {"datumi": oblikuj_oznake_grafa(seznam_datumov), "nizi": nizi}
+    podatki_grafa = {"datumi": seznam_datumov, "nizi": nizi}
 
-    danasnje_terapije = baza.execute(
-        """
-        SELECT t.id, t.naziv,
-               (SELECT COUNT(*) FROM zapis_terapije z
-                WHERE z.terapija_id = t.id AND substr(z.casovna_znacka, 1, 10) = ?) AS vzeto_danes
-        FROM terapija t
-        WHERE t.uporabnik_id = ? AND t.aktivna = 1
-        ORDER BY t.naziv
-        """,
-        (danes.isoformat(), g.uporabnik["id"]),
+    aktivne_terapije = baza.execute(
+        "SELECT id, naziv FROM terapija WHERE uporabnik_id = ? AND aktivna = 1 ORDER BY naziv",
+        (g.uporabnik["id"],),
     ).fetchall()
+
+    danasnje_terapije = []
+    for terapija in aktivne_terapije:
+        ure_danes = [
+            vrstica["casovna_znacka"][11:16]
+            for vrstica in baza.execute(
+                """
+                SELECT casovna_znacka FROM zapis_terapije
+                WHERE terapija_id = ? AND substr(casovna_znacka, 1, 10) = ?
+                ORDER BY casovna_znacka
+                """,
+                (terapija["id"], danes.isoformat()),
+            ).fetchall()
+        ]
+        danasnje_terapije.append(
+            {"id": terapija["id"], "naziv": terapija["naziv"], "ure_danes": ure_danes}
+        )
 
     return render_template("domov.html", podatki_grafa=podatki_grafa, terapije=danasnje_terapije)
 
@@ -197,8 +204,11 @@ def registracija():
         napaka = None
         if not uporabnisko_ime:
             napaka = "Uporabniško ime je obvezno."
-        elif not geslo or len(geslo) < 6:
-            napaka = "Geslo mora imeti vsaj 6 znakov."
+        elif not geslo_ustreza_zahtevam(geslo):
+            napaka = (
+                "Geslo mora imeti vsaj 8 znakov, eno veliko črko in en poseben "
+                f"znak (npr. {PRIMER_VELJAVNEGA_GESLA})."
+            )
         elif geslo != potrdi_geslo:
             napaka = "Gesli se ne ujemata."
 
@@ -743,11 +753,22 @@ def povzetek():
         for naziv, vrednosti in jakosti_po_simptomu.items()
     ]
 
-    podatki_grafa = {"datumi": oblikuj_oznake_grafa(seznam_datumov), "nizi": nizi}
+    podatki_grafa = {"datumi": seznam_datumov, "nizi": nizi}
 
     aktivne_terapije = baza.execute(
         "SELECT naziv, odmerek, pogostost FROM terapija WHERE uporabnik_id = ? AND aktivna = 1 ORDER BY naziv",
         (g.uporabnik["id"],),
+    ).fetchall()
+
+    zapisi_jemanja = baza.execute(
+        """
+        SELECT z.casovna_znacka, t.naziv AS terapija_naziv
+        FROM zapis_terapije z
+        JOIN terapija t ON z.terapija_id = t.id
+        WHERE t.uporabnik_id = ? AND substr(z.casovna_znacka, 1, 10) BETWEEN ? AND ?
+        ORDER BY z.casovna_znacka
+        """,
+        (g.uporabnik["id"], zacetek, konec),
     ).fetchall()
 
     return render_template(
@@ -755,6 +776,7 @@ def povzetek():
         zapisi=zapisi,
         podatki_grafa=podatki_grafa,
         terapije=aktivne_terapije,
+        zapisi_jemanja=zapisi_jemanja,
         zacetek=zacetek,
         konec=konec,
     )

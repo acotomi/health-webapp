@@ -273,6 +273,51 @@ input[type="range"] {
     font-size: 0.8rem;
 }
 
+.polje-gesla {
+    position: relative;
+    margin-top: 0.3rem;
+}
+
+.polje-gesla input {
+    margin-top: 0;
+    padding-right: 2.75rem;
+}
+
+.gumb-oko {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 46px;
+    margin: 0;
+    padding: 0;
+    color: var(--barva-besedilo-umirjeno);
+    background: none;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.gumb-oko:hover {
+    color: var(--barva-poudarek);
+    background: none;
+}
+
+.ikona-oko-prekrizano {
+    display: none;
+}
+
+.gumb-oko.aktivno .ikona-oko-odprto {
+    display: none;
+}
+
+.gumb-oko.aktivno .ikona-oko-prekrizano {
+    display: block;
+}
+
 button,
 input[type="submit"],
 .gumb {
@@ -487,6 +532,14 @@ td button {
 .celica-stevilo,
 .celica-datum {
     white-space: nowrap;
+}
+
+.celica-podrobnost {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--barva-besedilo-umirjeno);
+    font-size: 0.8rem;
+    font-weight: 400;
 }
 
 .graf-kartica {

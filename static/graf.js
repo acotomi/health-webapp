@@ -26,11 +26,32 @@ const vtaknjenoObmocja = {
     },
 };
 
+function oblikujOznakeGrafa(seznamISO) {
+    // Enaka logika kot za tabele (datumi.js): letnica se izpiše samo na prvi
+    // oznaki in ob spremembi leta, sicer samo dan in mesec. Vrstni red/ločila
+    // sledijo sistemski nastavitvi uporabnika (Intl, brez privzete lokacije),
+    // enako kot pri <input type="date">.
+    const zLetom = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "numeric", year: "numeric" });
+    const brezLeta = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "numeric" });
+    let zadnjeLeto = null;
+
+    return seznamISO.map((iso) => {
+        const d = new Date(`${iso}T00:00:00`);
+        if (d.getFullYear() !== zadnjeLeto) {
+            zadnjeLeto = d.getFullYear();
+            return zLetom.format(d);
+        }
+        return brezLeta.format(d);
+    });
+}
+
 function narisiGrafSimptomov(podatki) {
     const platno = document.getElementById("graf-simptomov");
     if (!platno || podatki.nizi.length === 0) {
         return;
     }
+
+    const oznakeOsiX = oblikujOznakeGrafa(podatki.datumi);
 
     // Namenoma brez rdeče/rožnate/vijolične - ozadje uporablja rdečo za "huda",
     // modra in vijolična pa sta si (tudi pri barvni slepoti) preveč podobni.
@@ -42,7 +63,7 @@ function narisiGrafSimptomov(podatki) {
     new Chart(platno, {
         type: "line",
         data: {
-            labels: podatki.datumi,
+            labels: oznakeOsiX,
             datasets: podatki.nizi.map((niz, i) => ({
                 label: niz.naziv,
                 data: niz.vrednosti,

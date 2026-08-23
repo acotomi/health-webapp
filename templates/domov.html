@@ -42,7 +42,12 @@
         {% for terapija in terapije %}
         <tr>
             <td data-label="Naziv">{{ terapija.naziv }}</td>
-            <td data-label="Danes vzeto" class="celica-stevilo">{{ terapija.vzeto_danes }}</td>
+            <td data-label="Danes vzeto" class="celica-stevilo">
+                {{ terapija.ure_danes | length }}
+                {% if terapija.ure_danes %}
+                <span class="celica-podrobnost">{{ terapija.ure_danes | join(" · ") }}</span>
+                {% endif %}
+            </td>
             <td class="celica-dejanja">
                 <div class="dejanja">
                     <form method="post" action="{{ url_for('oznaci_vzeto', terapija_id=terapija.id) }}">

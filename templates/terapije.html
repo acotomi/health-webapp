@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_ikone.html" import kapsula, svincnik, kos, obnovi %}
+{% from "_ikone.html" import kapsula, svincnik, kos, pavza, obnovi %}
 
 {% block naslov %}Terapije{% endblock %}
 
@@ -46,9 +46,9 @@
                     <a class="gumb gumb-sekundaren" href="{{ url_for('zgodovina_terapije', terapija_id=terapija.id) }}">Zgodovina</a>
                     <form method="post" action="{{ url_for('preklopi_terapijo', terapija_id=terapija.id) }}">
                         <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
-                        <button type="submit" class="gumb-ikona {{ 'gumb-nevarno' if terapija.aktivna else 'gumb-sekundaren' }}"
+                        <button type="submit" class="gumb-ikona gumb-sekundaren"
                                 aria-label="{{ 'Ukini' if terapija.aktivna else 'Ponovno aktiviraj' }}">
-                            {% if terapija.aktivna %}{{ kos() }}{% else %}{{ obnovi() }}{% endif %}
+                            {% if terapija.aktivna %}{{ pavza() }}{% else %}{{ obnovi() }}{% endif %}
                             <span class="namig" aria-hidden="true">{{ "Ukini" if terapija.aktivna else "Ponovno aktiviraj" }}</span>
                         </button>
                     </form>

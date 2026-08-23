@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_ikone.html" import oko %}
 
 {% block naslov %}Prijava{% endblock %}
 
@@ -10,14 +11,21 @@
     <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
 
     <label for="uporabnisko_ime">Uporabniško ime</label>
-    <input type="text" id="uporabnisko_ime" name="uporabnisko_ime" autocomplete="username" required>
+    <input type="text" id="uporabnisko_ime" name="uporabnisko_ime" autocomplete="username" required
+           value="{{ request.form.get('uporabnisko_ime', '') }}">
 
     <label for="geslo">Geslo</label>
-    <input type="password" id="geslo" name="geslo" autocomplete="current-password" required>
+    <div class="polje-gesla">
+        <input type="password" id="geslo" name="geslo" autocomplete="current-password" required>
+        <button type="button" class="gumb-oko" data-cilj="geslo" aria-pressed="false" aria-label="Prikaži geslo">
+            {{ oko() }}
+        </button>
+    </div>
 
     <button type="submit">Prijava</button>
 </form>
 
 <p><a href="{{ url_for('registracija') }}">Še nimate računa? Registrirajte se.</a></p>
 </div>
+<script src="{{ url_for('static', filename='geslo.js') }}"></script>
 {% endblock %}

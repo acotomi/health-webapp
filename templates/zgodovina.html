@@ -34,7 +34,7 @@
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td data-label="Datum" class="celica-datum">{{ zapis.datum | datum_sl }}</td>
+            <td data-label="Datum" class="celica-datum" data-datum="{{ zapis.datum }}">{{ zapis.datum | datum_sl }}</td>
             <td data-label="Simptom">{{ zapis.simptom_naziv }}</td>
             <td data-label="Jakost" class="celica-stevilo">{{ zapis.jakost }}</td>
             <td data-label="Opomba">{{ zapis.opomba or "–" }}</td>
@@ -62,4 +62,5 @@
 {% else %}
 <p>V izbranem obdobju ni zapisov.</p>
 {% endif %}
+<script src="{{ url_for('static', filename='datumi.js') }}"></script>
 {% endblock %}

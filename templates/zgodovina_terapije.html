@@ -16,7 +16,7 @@
     <tbody>
         {% for zapis in zapisi %}
         <tr>
-            <td data-label="Datum in ura" class="celica-datum">{{ zapis.casovna_znacka | casovna_znacka_sl }}</td>
+            <td data-label="Datum in ura" class="celica-datum" data-casovna-znacka="{{ zapis.casovna_znacka }}">{{ zapis.casovna_znacka | casovna_znacka_sl }}</td>
             <td class="celica-dejanja">
                 <div class="dejanja">
                     <a class="gumb gumb-ikona gumb-sekundaren"
@@ -47,4 +47,5 @@
 
 <p><a href="{{ url_for('terapije') }}">Nazaj na seznam terapij</a></p>
 </div>
+<script src="{{ url_for('static', filename='datumi.js') }}"></script>
 {% endblock %}

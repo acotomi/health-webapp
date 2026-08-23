@@ -26,9 +26,28 @@
 </svg>
 {% endmacro %}
 
+{% macro pavza() %}
+<svg class="ikona" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="6" y="5" width="4" height="14" rx="1"/>
+    <rect x="14" y="5" width="4" height="14" rx="1"/>
+</svg>
+{% endmacro %}
+
 {% macro obnovi() %}
 <svg class="ikona" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M4 12a8 8 0 1 1 2.5 5.8"/>
     <path d="M4 17v-4h4"/>
+</svg>
+{% endmacro %}
+
+{% macro oko() %}
+<svg class="ikona ikona-oko-odprto" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/>
+    <circle cx="12" cy="12" r="3"/>
+</svg>
+<svg class="ikona ikona-oko-prekrizano" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/>
+    <circle cx="12" cy="12" r="3"/>
+    <line x1="3" y1="3" x2="21" y2="21"/>
 </svg>
 {% endmacro %}

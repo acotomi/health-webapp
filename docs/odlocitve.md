@@ -350,3 +350,42 @@ dveh mestih v kodi, dokumentiranih s komentarjem.
 
 **Za katero poglavje:** 4.3.2 (podatkovni model), 4.4 (vmesnik), 5 (razprava
 — utemeljitev odstopanja od mentorjevega prvotnega predloga).
+
+## 2026-08-21 — Prikaz datumov poenoten z vnosnim poljem prek Intl.DateTimeFormat
+
+**Vprašanje:** Naši lastni izpisi datumov (tabele, povzetek, graf) so bili
+fiksno v slovenski obliki, medtem ko `<input type="date">` prikaže obliko
+glede na jezik/OS brskalnika (odločitev 2026-08-20). Avtor je želel, da so
+vsi izpisi na strani medsebojno usklajeni z isto (brskalnikovo) obliko, ne
+da je en del strani fiksno slovenski, drugi pa prilagodljiv.
+
+**Odločitev:** Strežnik še vedno izriše privzeto slovensko obliko (deluje
+brez JavaScripta). Nova skripta `static/datumi.js` ob nalaganju strani
+prepiše elemente z atributom `data-datum`/`data-casovna-znacka` v obliko, ki
+jo vrne `Intl.DateTimeFormat()` brez izrecne lokacije (uporabi privzeto
+jezikovno/sistemsko nastavitev brskalnika — enako, kar uporablja
+`<input type="date">`). Enaka logika je vgrajena v `static/graf.js` za
+oznake na osi x grafa (Chart.js tako ali tako zahteva JavaScript, zato tam
+ni potrebe po ne-JS različici). Logika "letnica samo na prvi oznaki/ob
+spremembi leta" (odločitev 2026-08-20) je ohranjena, le prestavljena iz
+Pythona v JavaScript.
+
+**Utemeljitev:** N2 (razumljiv, dosleden vmesnik) — če je vnosno polje
+prikazano npr. v ameriški obliki (7/22/2026), a preostale tabele v slovenski
+(22. 7. 2026), je to znotraj iste strani neskladno in zavajajoče. `Intl`
+je vgrajen del JavaScripta v vseh sodobnih brskalnikih, zato ne uvaja nove
+zunanje odvisnosti. Postopno izboljšanje (progressive enhancement) —
+osnovna, vedno berljiva slovenska oblika ostane brez JavaScripta, prilagojena
+oblika se doda le, če je JavaScript na voljo — zato stran ne postane
+neuporabna, če je JavaScript izklopljen.
+
+**Zavrnjene možnosti:**
+- Fiksna slovenska oblika povsod, vključno z vnosnim poljem (zahtevalo bi
+  zamenjavo native `<input type="date">` z lastnim poljem — možnost, ki je
+  bila pri odločitvi 2026-08-20 že enkrat zavrnjena).
+- Zaznavanje jezika na strežniku prek glave `Accept-Language` — zavrnjeno,
+  ker ne odraža nujno enake nastavitve, kot jo za prikaz uporablja
+  `<input type="date">` (ta sledi jeziku/regiji operacijskega sistema, ne
+  nujno jeziku brskalnika).
+
+**Za katero poglavje:** 4.4 (vmesnik).
