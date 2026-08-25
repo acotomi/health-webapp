@@ -15,15 +15,29 @@
         <label for="do">Do</label>
         <input type="date" id="do" name="do" value="{{ konec }}">
     </div>
+    <div class="polje">
+        <label for="simptom_id">Simptom</label>
+        <select id="simptom_id" name="simptom_id">
+            <option value="">Vsi simptomi</option>
+            {% for simptom in simptomi %}
+            <option value="{{ simptom.id }}" {% if simptom.id == izbrani_simptom_id %}selected{% endif %}>{{ simptom.naziv }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
     <button type="submit">Prikaži</button>
 </form>
 
 {% if zapisi %}
+<form method="post" id="vec-izbor-obrazec" action="{{ url_for('izbrisi_vec_zapisov_simptoma') }}"
+      onsubmit="return confirm('Izbrišete vse izbrane zapise?')">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+</form>
 <div class="tabela-okvir sklop">
 <table class="odzivna-tabela">
     <thead>
         <tr>
+            <th class="celica-potrditev"><input type="checkbox" data-izberi-vse="simptomi" aria-label="Izberi vse"></th>
             <th>Datum</th>
             <th>Simptom</th>
             <th>Jakost</th>
@@ -34,6 +48,10 @@
     <tbody>
         {% for zapis in zapisi %}
         <tr>
+            <td class="celica-potrditev" data-label="Izberi">
+                <input type="checkbox" name="zapis_id" value="{{ zapis.id }}" form="vec-izbor-obrazec"
+                       data-skupina="simptomi" aria-label="Izberi zapis z dne {{ zapis.datum | datum_sl }}">
+            </td>
             <td data-label="Datum" class="celica-datum" data-datum="{{ zapis.datum }}">{{ zapis.datum | datum_sl }}</td>
             <td data-label="Simptom">{{ zapis.simptom_naziv }}</td>
             <td data-label="Jakost" class="celica-stevilo">{{ zapis.jakost }}</td>
@@ -59,8 +77,12 @@
     </tbody>
 </table>
 </div>
+<div class="vrstica-gumbov">
+    <button type="submit" form="vec-izbor-obrazec" class="gumb-nevarno">Izbriši izbrano</button>
+</div>
 {% else %}
 <p>V izbranem obdobju ni zapisov.</p>
 {% endif %}
 <script src="{{ url_for('static', filename='datumi.js') }}"></script>
+<script src="{{ url_for('static', filename='vec-izbor.js') }}"></script>
 {% endblock %}

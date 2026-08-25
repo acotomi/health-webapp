@@ -22,10 +22,15 @@ ugotovljeni pomanjkljivosti obstoječih rešitev.
 |---|---|
 | N1 | Dostopno prek brskalnika, brez nameščanja |
 | N2 | Vmesnik v slovenščini, berljiva pisava, brez nepotrebnih elementov |
-| N3 | Vnos dnevnega zapisa v največ treh korakih |
+| N3 | Vnos dnevnega zapisa v največ treh korakih (izjema: polje za datum pri zapisu simptoma, glej opombo pod tabelo) |
 | N4 | Uporabnik dostopa izključno do lastnih podatkov |
 | N5 | Gesla shranjena v zgoščeni obliki |
 | N6 | Zbrani le podatki, nujni za delovanje |
+
+*Opomba k N3:* obrazec "Nov zapis simptoma" ima štiri korake, ne tri — dodano
+je polje za datum (privzeto današnji dan), ker se uporabnik simptoma
+pogosto spomni šele naslednji dan (npr. je med simptomom zaspal). Odločitev
+in utemeljitev: `docs/odlocitve.md`, 2026-08-24.
 
 ## 3 Podatkovni model
 
@@ -82,11 +87,11 @@ uporabnik 1:N terapija · terapija 1:N zapis_terapije
 |---|---|---|
 | Prijava / registracija | obrazec | F1 |
 | Nadzorna plošča | graf zadnjih 30 dni, gumb za nov zapis, današnje terapije | F4, F6 |
-| Nov zapis simptoma | izbira simptoma, drsnik jakosti, opomba | F2, N3 |
+| Nov zapis simptoma | izbira datuma (privzeto danes), izbira simptoma, drsnik jakosti, opomba | F2, N3 |
 | Simptomi | seznam vrst simptomov, dodajanje, urejanje naziva, brisanje | F2, F8 |
 | Terapije | seznam, dodajanje, urejanje, ukinjanje/izbris, označi kot vzeto | F3, F4 |
-| Zgodovina jemanja terapije | seznam datumov in ur jemanja za izbrano terapijo, urejanje ure, brisanje posameznega zapisa | F4, F8 |
-| Zgodovina | tabela zapisov z izbiro obdobja, urejanje in brisanje | F5, F8 |
+| Zgodovina jemanja terapije | seznam datumov in ur jemanja za izbrano terapijo, urejanje ure, posamično in množično brisanje | F4, F8 |
+| Zgodovina | tabela zapisov z izbiro obdobja in simptoma, urejanje, posamično in množično brisanje | F5, F8 |
 | Povzetek | graf in tabela za izbrano obdobje, oblikovano za tisk | F7 |
 
 ## 5 Seznam nalog
@@ -129,6 +134,10 @@ uporabnik 1:N terapija · terapija 1:N zapis_terapije
 ### Zaključek
 - [ ] Preizkus vseh scenarijev
 - [ ] Posnetki zaslona za poglavje 4.4
+- [ ] **V poglavju 4.4 obvezno opisati odziven prikaz (responsive design)** —
+      navesti, da aplikacija deluje na namiznih računalnikih in mobilnih
+      napravah, priložiti primerjalne posnetke zaslona (namizni + mobilni
+      prikaz iste strani, npr. Terapije ali Zgodovina)
 - [ ] Izseki kode za prilogo
 - [ ] `README.md` z navodili za zagon
 

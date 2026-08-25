@@ -21,7 +21,7 @@
     <canvas id="graf-simptomov" height="220"></canvas>
 </div>
 <p class="pojasnilo">
-    Barvna območja prikazujejo grobo jakost: zeleno = blaga (0–3), rumeno =
+    Barvna območja prikazujejo definirana območja jakosti simptomov: zeleno = blaga (0–3), rumeno =
     zmerna (4–6), rdeče = huda (7–10).
 </p>
 {% else %}
@@ -41,7 +41,12 @@
     <tbody>
         {% for terapija in terapije %}
         <tr>
-            <td data-label="Naziv">{{ terapija.naziv }}</td>
+            <td data-label="Naziv">
+                {{ terapija.naziv }}
+                {% if terapija.odmerek or terapija.pogostost %}
+                <span class="celica-podrobnost">{{ [terapija.odmerek, terapija.pogostost] | select | join(" · ") }}</span>
+                {% endif %}
+            </td>
             <td data-label="Danes vzeto" class="celica-stevilo">
                 {{ terapija.ure_danes | length }}
                 {% if terapija.ure_danes %}

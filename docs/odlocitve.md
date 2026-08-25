@@ -414,3 +414,125 @@ bi pri več terapijah/odmerkih na dan graf hitro postal vizualno natrpan (v
 nasprotju z N2). Ločena tabela doseže enak namen brez tega tveganja.
 
 **Za katero poglavje:** 4.3.2 (obseg zahteve F7), 4.4 (vmesnik).
+
+## 2026-08-24 — Dodan graf jemanja terapij v Povzetek (dopolnitev prejšnjega vnosa)
+
+**Vprašanje:** Ali naj bo zgodovina jemanja terapij v Povzetku prikazana
+samo kot tabela, ali tudi kot graf (enak vzorec kot pri simptomih — graf in
+tabela skupaj)?
+
+**Odločitev:** Dodan je graf "Jemanje terapij" (os x: datum, os y: število
+odmerkov na dan, ena črta na terapijo) — ista paleta barv/oblik kot pri
+grafu simptomov, izločena v skupni konstanti v `graf.js`. Graf in tabela
+sta ločeni razdelka, kot pri simptomih.
+
+**Utemeljitev:** N2 (razumljiv prikaz) — graf hitro pokaže vzorec jemanja
+(npr. izpuščeni dnevi), tabela pa natančne ure za posamezen dogodek, kar
+grafa (agregat po dnevih) ne pokaže. Ločeno od grafa jakosti simptomov, kot
+je bilo dogovorjeno prej.
+
+**Pomembna razlika od grafa simptomov:** manjkajoč dan pri jemanju terapij
+pomeni resnično 0 odmerkov (ne manjkajoč zapis), zato graf uporablja `0`
+namesto `null`/`spanGaps` in nima fiksnega `max` na osi y (število odmerkov
+ni omejeno na 0–10 kot jakost).
+
+**Za katero poglavje:** 4.4 (vmesnik).
+
+## 2026-08-24 — Gostota oznak na osi x grafa: nazaj na Chart.js autoSkip
+
+**Vprašanje:** Prejšnja odločitev (2026-08-19/20) je zahtevala prikaz VSEH
+dni na osi x (`autoSkip: false`). Mentor je pri pregledu opozoril, da je pri
+daljšem obdobju na mobilnem zaslonu prikaz prenatrpan, in predlagal omejitev
+na približno 10-15 oznak, prilagojeno širini zaslona.
+
+**Odločitev:** `autoSkip: false` je zamenjan z `autoSkip: true,
+maxTicksLimit: 15` v obeh grafih (`static/graf.js`). Chart.js zdaj sam
+izpusti del oznak, kadar je oznak preveč za razpoložljivo širino.
+
+**Utemeljitev:** Avtor je po tehtanju obeh nasprotujočih si zahtev (prejšnja:
+"vsi dnevi vedno vidni"; mentorjeva: "omejitev gostote") pritrdil
+mentorjevemu predlogu — N2 (razumljiv vmesnik, brez natrpanosti) na mobilnem
+zaslonu pretehta nad natančnostjo vsake posamezne oznake, ki pri daljšem
+obdobju itak ni ključna (pomembnejši je splošen vzorec/trend).
+
+**Zavrnjene možnosti:** Obdržati `autoSkip: false` (prejšnja odločitev) —
+zavrnjeno zaradi natrpanosti na mobilnem zaslonu pri daljših obdobjih.
+
+**Za katero poglavje:** 4.4 (vmesnik), 5 (razprava — sprememba prejšnje
+odločitve na podlagi mentorjeve pripombe).
+
+## 2026-08-24 — Množično brisanje zapisov (potrditvena polja + "Izberi vse")
+
+**Vprašanje:** Pri obsežnejši zgodovini (npr. 45 zapisov) je posamično
+brisanje zamudno. Mentor je predlagal potrditvena polja pred vsako vrstico,
+"izberi vse/odizberi vse" in gumb "Izbriši izbrano" s potrditvenim oknom.
+
+**Odločitev:** Dodano v Zgodovino (zapisi simptomov) in Zgodovino jemanja
+terapije (ne v Simptome/Terapije, ker gre tam za kratke sezname vrst, ne
+zapisov). Vsaka vrstica dobi potrditveno polje, glava tabele "izberi vse",
+spodaj gumb "Izbriši izbrano" s potrditvenim oknom. Tehnično: potrditvena
+polja in gumb so prek HTML atributa `form="..."` povezana z ločenim,
+praznim `<form>` (izven tabele), ne gnezdena znotraj obstoječih
+posamičnih obrazcev za urejanje/brisanje po vrstici — HTML ne dovoljuje
+gnezdenja `<form>` znotraj `<form>`. "Izberi vse" je edini del, ki zahteva
+JavaScript (`static/vec-izbor.js`) — brez njega množično brisanje še vedno
+deluje (ročno označevanje posameznih polj), le brez bližnjice za "vse".
+
+**Utemeljitev:** F8 (uporabnik ureja/briše lastne zapise) — množično
+brisanje je razširitev iste zahteve, ne nova zmožnost izven obsega.
+Strežniška stran preveri lastništvo vsakega ID-ja v izbiri (ne zaupa
+seznamu iz obrazca) — enak vzorec preverjanja kot pri vseh drugih
+poizvedbah v aplikaciji (N4).
+
+**Za katero poglavje:** 4.3.2 (F8), 4.4 (vmesnik), 4.5 (preverjanje
+lastništva pri množičnem dejanju).
+
+## 2026-08-24 — Polje za datum na obrazcu "Nov zapis simptoma" (obrat prejšnje odločitve)
+
+**Vprašanje:** Odločitev z dne 2026-08-18 je izključila polje za datum iz
+hitrega obrazca za nov zapis simptoma (N3: največ trije koraki). Mentor je
+to ponovno predlagal; avtor je po premisleku presodil, da je nujno.
+
+**Odločitev:** Obrazec "Nov zapis simptoma" ima zdaj štiri korake: datum
+(privzeto današnji dan, `<input type="date" max="danes">`), simptom,
+jakost, opomba. Strežnik zavrne prihodnje datume.
+
+**Utemeljitev:** Avtorjev razlog: simptom se pogosto opazi šele naslednji
+dan (npr. zaspiš med slabostjo, se šele zjutraj spomniš, da te je bolela
+glava). Prejšnja rešitev (vnos z današnjim datumom, popravek datuma šele
+kasneje prek urejanja v Zgodovini) je zahtevala dva ločena obiska namesto
+enega. N3 (trije koraki) je bila ocenjena kot manj pomembna od dejanske
+uporabnosti — praktična nujnost je pretehtala nad črko zahteve. Opomba v
+`SPECIFIKACIJA.md` pod N3 to izrecno pojasnjuje, da odstopanje ni spregled.
+
+**Zavrnjene možnosti:** Obdržati tri korake, retroaktiven vnos samo prek
+urejanja v Zgodovini (prejšnja odločitev, 2026-08-18) — zavrnjeno kot
+premalo uporabno za pogost primer poznega vnosa.
+
+**Za katero poglavje:** 4.3.2 (podatkovni model/obrazci), 4.4 (vmesnik), 5
+(razprava — sprememba prejšnje odločitve, tehtanje N3 proti uporabnosti).
+
+## 2026-08-24 — Filtriranje Zgodovine po vrsti simptoma (obrat prejšnje odločitve)
+
+**Vprašanje:** Pri prejšnjem popravku (isti dan, prej v tej seji) je bilo
+odločeno, da povezava iz sporočila "ni mogoče izbrisati" pelje na splošno
+Zgodovino, brez filtra po simptomu, ker bi to pomenilo novo funkcionalnost.
+Avtor se je premislil in filtriranje eksplicitno naročil.
+
+**Odločitev:** Zgodovina ima nov spustni seznam "Simptom" (privzeto "Vsi
+simptomi") poleg obstoječega filtra po datumu. Povezava iz sporočila o
+neuspelem brisanju simptoma zdaj pripelje neposredno na Zgodovino,
+filtrirano na ta simptom (`/zgodovina?simptom_id=<id>`).
+
+**Utemeljitev:** F5 (pregled zgodovine zapisov) — filter po simptomu je
+naravna razširitev obstoječega filtriranja po obdobju, ne ločena zmožnost.
+Lastništvo je zaščiteno enako kot povsod: poizvedba filtrira po
+`s.uporabnik_id = ?` ne glede na to, ali je simptom_id podan, zato tuj
+simptom_id preprosto ne vrne rezultatov, ne razkrije napake.
+
+**Zavrnjene možnosti:** Brez filtra, samo splošna povezava na Zgodovino
+(prejšnja odločitev znotraj iste seje) — zavrnjeno po avtorjevem
+premisleku, da je filter dovolj majhna, smiselna razširitev obstoječega
+vzorca.
+
+**Za katero poglavje:** 4.3.2 (F5), 4.4 (vmesnik).

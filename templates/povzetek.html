@@ -34,7 +34,7 @@
     <canvas id="graf-simptomov" height="220"></canvas>
 </div>
 <p class="pojasnilo">
-    Barvna območja prikazujejo grobo jakost: zeleno = blaga (0–3), rumeno =
+    Barvna območja prikazujejo definirana območja jakosti simptomov: zeleno = blaga (0–3), rumeno =
     zmerna (4–6), rdeče = huda (7–10).
 </p>
 {% else %}
@@ -64,6 +64,17 @@
 </div>
 {% else %}
 <p>Ni zapisov v izbranem obdobju.</p>
+{% endif %}
+</section>
+
+<section class="sklop">
+<h3>Jemanje terapij</h3>
+{% if podatki_grafa_terapij.nizi %}
+<div class="graf-kartica">
+    <canvas id="graf-terapij" height="220"></canvas>
+</div>
+{% else %}
+<p>V izbranem obdobju ni zapisov o jemanju terapij.</p>
 {% endif %}
 </section>
 
@@ -116,11 +127,13 @@
 
 <script>
     const podatkiGrafa = {{ podatki_grafa | tojson }};
+    const podatkiGrafaTerapij = {{ podatki_grafa_terapij | tojson }};
 </script>
 <script src="{{ url_for('static', filename='chart.js') }}"></script>
 <script src="{{ url_for('static', filename='graf.js') }}"></script>
 <script>
     narisiGrafSimptomov(podatkiGrafa);
+    narisiGrafTerapij(podatkiGrafaTerapij);
 </script>
 <script src="{{ url_for('static', filename='datumi.js') }}"></script>
 </div>

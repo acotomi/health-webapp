@@ -73,17 +73,23 @@
 
 <section class="sklop">
 <h2>Dodaj terapijo</h2>
-<form method="post" class="obrazec">
+<form method="post" class="filter-obrazec">
     <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
 
-    <label for="naziv">Naziv</label>
-    <input type="text" id="naziv" name="naziv" required placeholder="npr. Ibuprofen">
+    <div class="polje">
+        <label for="naziv">Naziv</label>
+        <input type="text" id="naziv" name="naziv" required placeholder="npr. Ibuprofen">
+    </div>
 
-    <label for="odmerek">Odmerek (neobvezno)</label>
-    <input type="text" id="odmerek" name="odmerek" placeholder="npr. 400 mg">
+    <div class="polje">
+        <label for="odmerek">Odmerek (neobvezno)</label>
+        <input type="text" id="odmerek" name="odmerek" placeholder="npr. 400 mg">
+    </div>
 
-    <label for="pogostost">Pogostost (neobvezno)</label>
-    <input type="text" id="pogostost" name="pogostost" placeholder="npr. 2-krat dnevno">
+    <div class="polje">
+        <label for="pogostost">Pogostost (neobvezno)</label>
+        <input type="text" id="pogostost" name="pogostost" placeholder="npr. 2-krat dnevno">
+    </div>
 
     <button type="submit">Dodaj</button>
 </form>

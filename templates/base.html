@@ -22,7 +22,7 @@
                            {% if request.endpoint in ('terapije', 'uredi_terapijo', 'zgodovina_terapije', 'uredi_zapis_terapije') %}aria-current="page"{% endif %}>Terapije</a>
                         <a href="{{ url_for('zgodovina') }}"
                            class="nav-povezava{% if request.endpoint in ('zgodovina', 'uredi_zapis_simptoma') %} aktivna{% endif %}"
-                           {% if request.endpoint in ('zgodovina', 'uredi_zapis_simptoma') %}aria-current="page"{% endif %}>Zgodovina Simptomov</a>
+                           {% if request.endpoint in ('zgodovina', 'uredi_zapis_simptoma') %}aria-current="page"{% endif %}>Zgodovina simptomov</a>
                         <a href="{{ url_for('povzetek') }}"
                            class="nav-povezava{% if request.endpoint == 'povzetek' %} aktivna{% endif %}"
                            {% if request.endpoint == 'povzetek' %}aria-current="page"{% endif %}>Povzetek</a>

@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta
 from functools import wraps
 
 from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
+from markupsafe import Markup
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import db
@@ -94,6 +95,17 @@ def stevilo_zapisov_besedilo(stevilo):
     return f"{stevilo} shranjenih zapisov"
 
 
+def stevilka_zapisov(stevilo):
+    """Slovnično pravilna oblika '<število> zapis(a/e/ov)', brez pridevnika."""
+    if stevilo == 1:
+        return f"{stevilo} zapis"
+    if stevilo == 2:
+        return f"{stevilo} zapisa"
+    if stevilo in (3, 4):
+        return f"{stevilo} zapise"
+    return f"{stevilo} zapisov"
+
+
 def prijava_zahtevana(pogled):
     @wraps(pogled)
     def ovita_funkcija(*args, **kwargs):
@@ -139,7 +151,7 @@ def domov():
     podatki_grafa = {"datumi": seznam_datumov, "nizi": nizi}
 
     aktivne_terapije = baza.execute(
-        "SELECT id, naziv FROM terapija WHERE uporabnik_id = ? AND aktivna = 1 ORDER BY naziv",
+        "SELECT id, naziv, odmerek, pogostost FROM terapija WHERE uporabnik_id = ? AND aktivna = 1 ORDER BY naziv",
         (g.uporabnik["id"],),
     ).fetchall()
 
@@ -157,7 +169,13 @@ def domov():
             ).fetchall()
         ]
         danasnje_terapije.append(
-            {"id": terapija["id"], "naziv": terapija["naziv"], "ure_danes": ure_danes}
+            {
+                "id": terapija["id"],
+                "naziv": terapija["naziv"],
+                "odmerek": terapija["odmerek"],
+                "pogostost": terapija["pogostost"],
+                "ure_danes": ure_danes,
+            }
         )
 
     return render_template("domov.html", podatki_grafa=podatki_grafa, terapije=danasnje_terapije)
@@ -316,9 +334,15 @@ def izbrisi_simptom(simptom_id):
         ).fetchone()[0]
 
         if stevilo_zapisov > 0:
+            # Markup: samo ta niz nima uporabniško vnesene vsebine (naziv
+            # simptoma tu ni vključen), zato je varno vsebuje pravo <a>
+            # povezavo brez pobega HTML - drugje flash sporočila ostanejo
+            # samodejno pobegnjena.
             flash(
-                f"Simptoma ni mogoče izbrisati, ker ima {stevilo_zapisov_besedilo(stevilo_zapisov)}. "
-                "Najprej izbrišite njegove zapise v Zgodovini.",
+                Markup(
+                    f"Simptoma ni mogoče izbrisati, ker ima {stevilo_zapisov_besedilo(stevilo_zapisov)}. "
+                    f'Najprej izbrišite njegove zapise v <a href="{url_for("zgodovina", simptom_id=simptom_id)}">Zgodovini</a>.'
+                ),
                 "napaka",
             )
         else:
@@ -345,23 +369,35 @@ def nov_zapis_simptoma():
         flash("Najprej dodajte vsaj eno vrsto simptoma.", "napaka")
         return redirect(url_for("simptomi"))
 
+    danes = date.today()
+
     if request.method == "POST":
         simptom_id = request.form.get("simptom_id", type=int)
         jakost = request.form.get("jakost", type=int)
         opomba = request.form.get("opomba", "").strip() or None
+        vnesen_datum = request.form.get("datum", "")
 
         veljaven_simptom = any(s["id"] == simptom_id for s in seznam_simptomov)
 
         napaka = None
+        izbran_datum = None
         if not veljaven_simptom:
             napaka = "Izberite veljaven simptom."
         elif jakost is None or not (0 <= jakost <= 10):
             napaka = "Jakost mora biti med 0 in 10."
+        else:
+            try:
+                izbran_datum = datetime.strptime(vnesen_datum, "%Y-%m-%d").date()
+            except ValueError:
+                napaka = "Vnesite veljaven datum."
+            else:
+                if izbran_datum > danes:
+                    napaka = "Datum ne sme biti v prihodnosti."
 
         if napaka is None:
             baza.execute(
                 "INSERT INTO zapis_simptoma (simptom_id, datum, jakost, opomba) VALUES (?, ?, ?, ?)",
-                (simptom_id, date.today().isoformat(), jakost, opomba),
+                (simptom_id, izbran_datum.isoformat(), jakost, opomba),
             )
             baza.commit()
             flash("Zapis je shranjen.", "uspeh")
@@ -369,7 +405,7 @@ def nov_zapis_simptoma():
 
         flash(napaka, "napaka")
 
-    return render_template("nov_zapis_simptoma.html", simptomi=seznam_simptomov)
+    return render_template("nov_zapis_simptoma.html", simptomi=seznam_simptomov, danes=danes.isoformat())
 
 
 @app.route("/terapije", methods=("GET", "POST"))
@@ -606,6 +642,33 @@ def izbrisi_zapis_terapije(terapija_id, zapis_id):
     return redirect(url_for("zgodovina_terapije", terapija_id=terapija_id))
 
 
+@app.route("/terapije/<int:terapija_id>/zgodovina/izbrisi-vec", methods=("POST",))
+@prijava_zahtevana
+def izbrisi_vec_zapisov_terapije(terapija_id):
+    id_seznam = request.form.getlist("zapis_id", type=int)
+
+    if not id_seznam:
+        flash("Nobenega zapisa nisi izbral.", "napaka")
+        return redirect(url_for("zgodovina_terapije", terapija_id=terapija_id))
+
+    baza = db.get_db()
+    placeholderji = ",".join("?" * len(id_seznam))
+    stevilo_izbrisanih = baza.execute(
+        f"""
+        DELETE FROM zapis_terapije
+        WHERE id IN ({placeholderji})
+          AND terapija_id = (
+              SELECT id FROM terapija WHERE id = ? AND uporabnik_id = ?
+          )
+        """,
+        (*id_seznam, terapija_id, g.uporabnik["id"]),
+    ).rowcount
+    baza.commit()
+
+    flash(f"Izbrisanih {stevilka_zapisov(stevilo_izbrisanih)}.", "uspeh")
+    return redirect(url_for("zgodovina_terapije", terapija_id=terapija_id))
+
+
 @app.route("/zgodovina")
 @prijava_zahtevana
 def zgodovina():
@@ -614,19 +677,37 @@ def zgodovina():
     danes = date.today()
     zacetek = request.args.get("od", (danes - timedelta(days=30)).isoformat())
     konec = request.args.get("do", danes.isoformat())
+    izbrani_simptom_id = request.args.get("simptom_id", type=int)
 
-    zapisi = baza.execute(
-        """
+    seznam_simptomov = baza.execute(
+        "SELECT id, naziv FROM simptom WHERE uporabnik_id = ? ORDER BY naziv",
+        (g.uporabnik["id"],),
+    ).fetchall()
+
+    poizvedba = """
         SELECT z.id, z.datum, z.jakost, z.opomba, s.naziv AS simptom_naziv
         FROM zapis_simptoma z
         JOIN simptom s ON z.simptom_id = s.id
         WHERE s.uporabnik_id = ? AND z.datum BETWEEN ? AND ?
-        ORDER BY z.datum DESC, z.id DESC
-        """,
-        (g.uporabnik["id"], zacetek, konec),
-    ).fetchall()
+    """
+    parametri = [g.uporabnik["id"], zacetek, konec]
 
-    return render_template("zgodovina.html", zapisi=zapisi, zacetek=zacetek, konec=konec)
+    if izbrani_simptom_id is not None:
+        poizvedba += " AND s.id = ?"
+        parametri.append(izbrani_simptom_id)
+
+    poizvedba += " ORDER BY z.datum DESC, z.id DESC"
+
+    zapisi = baza.execute(poizvedba, parametri).fetchall()
+
+    return render_template(
+        "zgodovina.html",
+        zapisi=zapisi,
+        zacetek=zacetek,
+        konec=konec,
+        simptomi=seznam_simptomov,
+        izbrani_simptom_id=izbrani_simptom_id,
+    )
 
 
 @app.route("/zgodovina/<int:zapis_id>/uredi", methods=("GET", "POST"))
@@ -712,6 +793,31 @@ def izbrisi_zapis_simptoma(zapis_id):
     return redirect(url_for("zgodovina"))
 
 
+@app.route("/zgodovina/izbrisi-vec", methods=("POST",))
+@prijava_zahtevana
+def izbrisi_vec_zapisov_simptoma():
+    id_seznam = request.form.getlist("zapis_id", type=int)
+
+    if not id_seznam:
+        flash("Nobenega zapisa nisi izbral.", "napaka")
+        return redirect(url_for("zgodovina"))
+
+    baza = db.get_db()
+    placeholderji = ",".join("?" * len(id_seznam))
+    stevilo_izbrisanih = baza.execute(
+        f"""
+        DELETE FROM zapis_simptoma
+        WHERE id IN ({placeholderji})
+          AND simptom_id IN (SELECT id FROM simptom WHERE uporabnik_id = ?)
+        """,
+        (*id_seznam, g.uporabnik["id"]),
+    ).rowcount
+    baza.commit()
+
+    flash(f"Izbrisanih {stevilka_zapisov(stevilo_izbrisanih)}.", "uspeh")
+    return redirect(url_for("zgodovina"))
+
+
 @app.route("/povzetek")
 @prijava_zahtevana
 def povzetek():
@@ -771,12 +877,25 @@ def povzetek():
         (g.uporabnik["id"], zacetek, konec),
     ).fetchall()
 
+    jemanja_po_terapiji = {}
+    for zapis in zapisi_jemanja:
+        dan = zapis["casovna_znacka"][:10]
+        dnevi = jemanja_po_terapiji.setdefault(zapis["terapija_naziv"], {})
+        dnevi[dan] = dnevi.get(dan, 0) + 1
+
+    nizi_terapij = [
+        {"naziv": naziv, "vrednosti": [dnevi.get(d, 0) for d in seznam_datumov]}
+        for naziv, dnevi in jemanja_po_terapiji.items()
+    ]
+    podatki_grafa_terapij = {"datumi": seznam_datumov, "nizi": nizi_terapij}
+
     return render_template(
         "povzetek.html",
         zapisi=zapisi,
         podatki_grafa=podatki_grafa,
         terapije=aktivne_terapije,
         zapisi_jemanja=zapisi_jemanja,
+        podatki_grafa_terapij=podatki_grafa_terapij,
         zacetek=zacetek,
         konec=konec,
     )

@@ -8,14 +8,27 @@
 <h2>Zgodovina jemanja: {{ terapija.naziv }}</h2>
 
 {% if zapisi %}
+<form method="post" id="vec-izbor-obrazec"
+      action="{{ url_for('izbrisi_vec_zapisov_terapije', terapija_id=terapija.id) }}"
+      onsubmit="return confirm('Izbrišete vse izbrane zapise?')">
+    <input type="hidden" name="csrf_zeton" value="{{ csrf_zeton() }}">
+</form>
 <div class="tabela-okvir">
 <table class="odzivna-tabela">
     <thead>
-        <tr><th>Datum in ura</th><th></th></tr>
+        <tr>
+            <th class="celica-potrditev"><input type="checkbox" data-izberi-vse="jemanja" aria-label="Izberi vse"></th>
+            <th>Datum in ura</th>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
         {% for zapis in zapisi %}
         <tr>
+            <td class="celica-potrditev" data-label="Izberi">
+                <input type="checkbox" name="zapis_id" value="{{ zapis.id }}" form="vec-izbor-obrazec"
+                       data-skupina="jemanja" aria-label="Izberi zapis ob {{ zapis.casovna_znacka }}">
+            </td>
             <td data-label="Datum in ura" class="celica-datum" data-casovna-znacka="{{ zapis.casovna_znacka }}">{{ zapis.casovna_znacka | casovna_znacka_sl }}</td>
             <td class="celica-dejanja">
                 <div class="dejanja">
@@ -41,6 +54,9 @@
     </tbody>
 </table>
 </div>
+<div class="vrstica-gumbov">
+    <button type="submit" form="vec-izbor-obrazec" class="gumb-nevarno">Izbriši izbrano</button>
+</div>
 {% else %}
 <p>Za to terapijo še ni zapisov o jemanju.</p>
 {% endif %}
@@ -48,4 +64,5 @@
 <p><a href="{{ url_for('terapije') }}">Nazaj na seznam terapij</a></p>
 </div>
 <script src="{{ url_for('static', filename='datumi.js') }}"></script>
+<script src="{{ url_for('static', filename='vec-izbor.js') }}"></script>
 {% endblock %}

@@ -534,6 +534,17 @@ td button {
     white-space: nowrap;
 }
 
+.celica-potrditev {
+    width: 1%;
+}
+
+.celica-potrditev input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    min-height: auto;
+    margin: 0;
+}
+
 .celica-podrobnost {
     display: block;
     margin-top: 0.2rem;
@@ -543,6 +554,8 @@ td button {
 }
 
 .graf-kartica {
+    position: relative;
+    height: clamp(260px, 45vw, 360px);
     padding: clamp(0.6rem, 2vw, 1.25rem);
     overflow: hidden;
     background-color: var(--barva-povrsina);
