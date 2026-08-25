@@ -97,39 +97,39 @@ uporabnik 1:N terapija · terapija 1:N zapis_terapije
 ## 5 Seznam nalog
 
 ### Postavitev
-- [ ] Virtualno okolje, `pip install flask`
-- [ ] `.gitignore` (venv, `__pycache__`, `*.db`, `.env`)
-- [ ] Osnovna Flask aplikacija, ki se zažene
-- [ ] `requirements.txt`
+- [x] Virtualno okolje, `pip install flask`
+- [x] `.gitignore` (venv, `__pycache__`, `*.db`, `.env`)
+- [x] Osnovna Flask aplikacija, ki se zažene
+- [x] `requirements.txt`
 
 ### Podatkovna baza
-- [ ] `schema.sql` s petimi tabelami
-- [ ] Funkcija za povezavo in inicializacijo baze
-- [ ] Testni podatki za razvoj
+- [x] `schema.sql` s petimi tabelami
+- [x] Funkcija za povezavo in inicializacijo baze
+- [x] Testni podatki za razvoj
 
 ### Uporabniški računi (F1, N4, N5)
-- [ ] Registracija z zgoščanjem gesla
-- [ ] Prijava in odjava, seja
-- [ ] Zaščita strani, ki zahtevajo prijavo
-- [ ] Preverjanje lastništva pri vsaki poizvedbi
+- [x] Registracija z zgoščanjem gesla
+- [x] Prijava in odjava, seja
+- [x] Zaščita strani, ki zahtevajo prijavo
+- [x] Preverjanje lastništva pri vsaki poizvedbi
 
 ### Simptomi (F2)
-- [ ] Dodajanje in prikaz vrst simptomov
-- [ ] Obrazec za nov zapis — največ trije koraki
-- [ ] Preverjanje vnosa (jakost 0–10, veljaven datum)
+- [x] Dodajanje, urejanje in prikaz vrst simptomov
+- [x] Obrazec za nov zapis (štirje koraki z datumom, glej opombo pri N3)
+- [x] Preverjanje vnosa (jakost 0–10, veljaven datum, ne v prihodnosti)
 
 ### Terapije (F3, F4)
-- [ ] Dodajanje, urejanje, ukinjanje terapije
-- [ ] Označevanje, da je terapija vzeta
+- [x] Dodajanje, urejanje, ukinjanje in brisanje terapije
+- [x] Označevanje, da je terapija vzeta (z uro)
 
 ### Pregled (F5, F6, F8)
-- [ ] Zgodovina z izbiro obdobja
-- [ ] Urejanje in brisanje zapisov
-- [ ] Graf s Chart.js, označena območja jakosti, kratko pojasnilo
+- [x] Zgodovina z izbiro obdobja in simptoma
+- [x] Urejanje ter posamično/množično brisanje zapisov
+- [x] Graf s Chart.js, označena območja jakosti, kratko pojasnilo
 
 ### Povzetek (F7)
-- [ ] Zaslon s tabelo in grafom za izbrano obdobje
-- [ ] CSS za tisk
+- [x] Zaslon s tabelo in grafom za izbrano obdobje (simptomi in terapije)
+- [x] CSS za tisk
 
 ### Zaključek
 - [ ] Preizkus vseh scenarijev

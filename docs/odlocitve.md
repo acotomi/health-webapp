@@ -536,3 +536,20 @@ premisleku, da je filter dovolj majhna, smiselna razširitev obstoječega
 vzorca.
 
 **Za katero poglavje:** 4.3.2 (F5), 4.4 (vmesnik).
+
+## 2026-08-25 — Popravek sesutja grafa ob spremembi velikosti okna
+
+**Vprašanje:** Po zožitvi in ponovni razširitvi okna brskalnika je graf
+ostal sploščen/napačne velikosti namesto pravilne obnovitve.
+
+**Odločitev:** `.graf-kartica` ima zdaj eksplicitno CSS višino
+(`clamp(260px, 45vw, 360px)`) in `position: relative`; v `graf.js` je pri
+obeh grafih dodan `maintainAspectRatio: false`.
+
+**Utemeljitev:** Privzeto (`maintainAspectRatio: true`) Chart.js višino
+grafa izračuna iz širine prek fiksnega razmerja, kar je ob prehodu
+ozko→široko okno povzročalo napačno preračunano velikost platna. Ločena,
+eksplicitna višina okvirja in `maintainAspectRatio: false` sta uradno
+priporočen pristop Chart.js za grafe v velikostno nadzorovanem vsebniku.
+
+**Za katero poglavje:** 4.4 (vmesnik, odzivnost).
