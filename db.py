@@ -2,7 +2,7 @@ import sqlite3
 
 from flask import current_app, g
 
-
+# Povezava z bazo in vklop tujih ključev
 def get_db():
     """Vrne povezavo z bazo za trenutno zahtevo; ustvari jo, če še ne obstaja."""
     if "db" not in g:

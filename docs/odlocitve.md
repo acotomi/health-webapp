@@ -553,3 +553,39 @@ eksplicitna višina okvirja in `maintainAspectRatio: false` sta uradno
 priporočen pristop Chart.js za grafe v velikostno nadzorovanem vsebniku.
 
 **Za katero poglavje:** 4.4 (vmesnik, odzivnost).
+
+## 2026-09-01 — Dostopnost tabel za bralnike zaslona: `scope="col"` na glavah
+
+**Vprašanje:** Pri preverjanju z bralnikom zaslona (Windows Narrator) avtor
+ni mogel razbrati, kateremu stolpcu pripada posamezna celica v tabelah
+Zgodovina, Terapije, Simptomi in Zgodovina jemanja terapije (npr. pri
+pomikanju po celici je Narrator prebral samo "Glavobol", ne "Simptom:
+Glavobol").
+
+**Odločitev:** Vsem `<th>` v `<thead>` teh štirih tabel je dodan atribut
+`scope="col"` (`zgodovina.html`, `terapije.html`, `simptomi.html`,
+`zgodovina_terapije.html`). Brez logične ali vizualne spremembe — le
+programska povezava med glavo stolpca in celicami pod njo.
+
+**Utemeljitev:** N2 (razumljiv vmesnik) velja tudi za uporabnike bralnikov
+zaslona, ne le vizualno. `scope="col"` je standardna WCAG tehnika (H51) za
+podatkovne tabele — brez nje bralnik zaslona pri pomikanju po celicah ne
+zna povedati, kateremu stolpcu celica pripada. Ker gre za zdravstveno
+aplikacijo, kjer je natančno razumevanje podatkov (npr. kateri simptom, ali
+katera jakost) pomembno, je to neposredno vezano na razumljivost vmesnika,
+ne le kozmetika.
+
+**Znana omejitev, ki ni bila naslovljena zdaj:** pod širino okna 820px se te
+tabele s CSS spremenijo v kartični prikaz (`display: block` na
+`<table>/<tr>/<td>`, glej `style.css`). Ko brskalnik preračuna vlogo
+elementa iz CSS `display`, tabela takrat izgubi ARIA vlogo tabele
+(table/row/cell) v dostopnostnem drevesu, zato `scope` na tej širini ne
+pomaga — bralnik zaslona takrat cele tabele ne bere več kot tabelo.
+Mobilni pogled ostaja dostopen na drug način (podatki so še vedno v DOM-u,
+zaporedoma), le brez table-navigacije bralnika zaslona po stolpcih. Popravek
+(npr. eksplicitne ARIA vloge `role="table"/"row"/"cell"` ob preklopu v
+kartični prikaz) bi zahteval dodatno testiranje in ni bil narejen zdaj —
+primerno kot omejitev v poglavju 5, ne prikrita pomanjkljivost.
+
+**Za katero poglavje:** 4.4 (vmesnik, dostopnost), 5 (razprava — omejitev
+dostopnosti na ozkih zaslonih).
